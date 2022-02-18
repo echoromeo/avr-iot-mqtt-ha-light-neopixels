@@ -388,5 +388,5 @@ static void enableUsartRxInterrupts(void)
     } while ((USART2.STATUS & USART_RXCIF_bm) != 0);
 	
     // Enable RX interrupt
-    USART2.CTRLA |=  1 << USART_RXCIE_bp;      
+    USART2.CTRLA |= USART_RXCIE_bm;      
 }

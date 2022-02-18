@@ -42,7 +42,7 @@
 
 // MCC generated parameters
 #define CFG_MQTT_PORT 8883
-#define CFG_MQTT_HOSTURL "a1gqt8sttiign3.iot.us-east-2.amazonaws.com"
+#define CFG_MQTT_HOSTURL "need.to.change.this"
 #define CFG_MQTT_SERVERIPv4_HEX 0x00000000
 #define CFG_MQTT_CONN_TIMEOUT 10
 #define CFG_MQTT_TXBUFFER_SIZE 400
