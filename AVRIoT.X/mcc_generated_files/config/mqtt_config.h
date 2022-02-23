@@ -65,7 +65,7 @@
 
 // Timeout is calculated on the basis of clock frequency.
 // This macro needs to be changed in accordance with the clock frequency.
-#define SECONDS (uint32_t)1000
+#define SECONDS (uint32_t)720 // I do not understand this number. the RTC frequency is 1k, so it should be 1024???
 #endif /* TCPIP_BSD */
 
 #ifdef TCPIP_LITE
@@ -74,7 +74,7 @@
 
 // Timeout is calculated on the basis of clock frequency.
 // This macro needs to be changed in accordance with the clock frequency.
-#define SECONDS (uint32_t)1000
+#define SECONDS (uint32_t)720 // I do not understand this number. the RTC frequency is 1k, so it should be 1024???
 #endif /* TCPIP_LITE */
 
 /*******************Timeout Driver for MQTT definitions*(END)******************/
