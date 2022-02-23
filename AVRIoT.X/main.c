@@ -74,7 +74,7 @@ void sendToCloud(void)
 
 	if (shared_networking_params.haveAPConnection) // Do we really need this one?
 	{
-		debug_printGOOD("Application: Sending Sensor Data");
+		debug_printIoTAppMsg("Application: Sending Sensor Data");
 		
 		rawTemperature = SENSORS_getTempValue();
 		light = SENSORS_getLightValue();
@@ -98,7 +98,8 @@ void subscribeToCloud(void)
 //This handles messages published from the MQTT server when subscribed
 void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 {
-	debug_printGOOD("Application: Received Data");
+	debug_printIoTAppMsg("Application: Received Data");
+	LED_test();
 	
 	// TODO: this is where to handle stuff..
 
