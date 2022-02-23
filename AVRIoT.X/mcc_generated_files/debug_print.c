@@ -29,7 +29,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "debug_print.h"
-
+#include "config/IoT_Sensor_Node_config.h"
 
 static const char *severity_strings[] = {
    CSI_WHITE   "   NONE" CSI_WHITE,
@@ -52,7 +52,10 @@ static char debug_message_prefix[20] = "<PREFIX>";
 void debug_init(const char *prefix)
 { 
    debug_setPrefix(prefix);
-   debug_setSeverity(SEVERITY_NONE);
+   if (CFG_DEBUG_PRINT > 1) // Just so we do not need to write "debug 3" all the time
+   {
+	   debug_setSeverity(CFG_DEBUG_PRINT);
+   }
 }
 
 void debug_setSeverity(debug_severity_t debug_level)

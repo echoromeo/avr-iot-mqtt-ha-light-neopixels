@@ -367,7 +367,7 @@ static void CLOUD_handleTransmitDebugMessage(void)
     switch (transmitState)
     {
         case MQTT_SEND_SUCCESS:
-            debug_print("MQTT: sendresult (%d)", MQTT_LastSentSize());
+            debug_print("MQTT: Send Success (%d)", MQTT_LastSentSize());
             break;
         case MQTT_SEND_ERROR:
             debug_printError("MQTT: Send Error");

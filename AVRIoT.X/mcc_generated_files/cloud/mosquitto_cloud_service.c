@@ -164,7 +164,7 @@ void CLOUD_disconnect(void)
     {
         if (MQTT_Disconnect(MQTT_GetClientConnectionInfo()) == DISCONNECTED)
 		{
-			debug_print("MQTT: sendresult (%d)", MQTT_LastSentSize());
+			debug_print("MQTT: Disconnect");
         }
     }
 }
