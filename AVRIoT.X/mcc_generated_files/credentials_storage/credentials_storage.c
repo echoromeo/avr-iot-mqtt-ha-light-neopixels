@@ -35,6 +35,7 @@
 #include <avr/eeprom.h>
 #include "credentials_storage.h"
 #include "../config/mqtt_config.h"
+#include "../cloud/crypto_client/crypto_client.h"
 
 /* Last used wifi credentials are stored in the WINC? */
 wifi_credentials_t wifi;

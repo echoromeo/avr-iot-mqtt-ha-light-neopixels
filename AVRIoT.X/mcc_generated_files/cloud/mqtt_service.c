@@ -145,9 +145,8 @@ void MQTT_CLIENT_connect(void)
 
 	memset(&cloudConnectPacket, 0, sizeof(mqttConnectPacket));
 
-	cloudConnectPacket.connectVariableHeader.connectFlagsByte.All = 0x02;
+	// The CreateConnectPacket function fills the flags and everything else for us
 	cloudConnectPacket.connectVariableHeader.keepAliveTimer = CFG_MQTT_CONN_TIMEOUT;
-
 	cloudConnectPacket.clientID			= (uint8_t*)eeprom->mqttCID;
 	cloudConnectPacket.password      	= (uint8_t *)eeprom->mqttPassword;
 	cloudConnectPacket.passwordLength	= strlen(eeprom->mqttPassword);

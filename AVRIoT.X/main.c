@@ -53,8 +53,6 @@ static char mqttSubscribeTopic[SUBSCRIBE_TOPIC_SIZE];
 static char lightandtemperaturetopic[PUBLISH_TOPIC_SIZE];
 static char json[PAYLOAD_SIZE];
 
-static uint8_t holdCount = 0;
-
 int main(void)
 {
 	application_init();
@@ -74,24 +72,20 @@ void sendToCloud(void)
 	int light = 0;
 	int len = 0;
 
-	if (shared_networking_params.haveAPConnection)
+	if (shared_networking_params.haveAPConnection) // Do we really need this one?
 	{
+		debug_printGOOD("Application: Sending Sensor Data");
+		
 		rawTemperature = SENSORS_getTempValue();
 		light = SENSORS_getLightValue();
 		len = sprintf(json,"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
 
 		sprintf(lightandtemperaturetopic, "%s/sensor", eeprom->mqttCID); // Can optimize this a lot if never changing CID
 		CLOUD_publishData((uint8_t*)lightandtemperaturetopic ,(uint8_t*)json, len);
-		if (holdCount)
-		{
-			holdCount--;
-		}
-		else
-		{
-			ledParameterYellow.onTime = LED_BLIP;
-			ledParameterYellow.offTime = LED_BLIP;
-			LED_control(&ledParameterYellow);
-		}
+
+		ledParameterYellow.onTime = LED_BLIP;
+		ledParameterYellow.offTime = LED_BLIP;
+		LED_control(&ledParameterYellow);
 	}
 }
 
@@ -104,13 +98,14 @@ void subscribeToCloud(void)
 //This handles messages published from the MQTT server when subscribed
 void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 {
+	debug_printGOOD("Application: Received Data");
+	
 	// TODO: this is where to handle stuff..
-	
-	ledParameterYellow.onTime = SOLID_ON;
-	ledParameterYellow.offTime = SOLID_OFF;
-	LED_control(&ledParameterYellow);
-	holdCount = 2;
-	
+
 	debug_printIoTAppMsg("topic: %s", topic);
 	debug_printIoTAppMsg("payload: %s", payload);
+	
+	ledParameterRed.onTime = LED_BLIP;
+	ledParameterRed.offTime = LED_BLIP;
+	LED_control(&ledParameterRed);
 }
