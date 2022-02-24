@@ -21,13 +21,6 @@
     SOFTWARE.
 */
 
-/*
- The aim here is to set up a Home Assistant MQTT Light with MQTT Discovery 
- - https://www.home-assistant.io/docs/mqtt/discovery/
- - https://www.home-assistant.io/integrations/light.mqtt/#implementations
-*/
-
-
 #include <xc.h>
 #include <string.h>
 #include <time.h>
@@ -50,9 +43,14 @@
 #include "mcc_generated_files/cloud/mqtt_service.h"
 #include "mcc_generated_files/mqtt/mqtt_core/mqtt_core.h"
 
+#define TOPIC_TEMPSENSORCONFIG 0
+#define TOPIC_LIGHTSENSORCONFIG 1
+#define TOPIC_SENSORSTATES 2
+
 static char mqttSubscribeTopic[SUBSCRIBE_TOPIC_SIZE];
-static char lightandtemperaturetopic[PUBLISH_TOPIC_SIZE];
-static char json[PAYLOAD_SIZE];
+static char mqttPublishTopic[3][PUBLISH_TOPIC_SIZE];
+static char json[3][PAYLOAD_SIZE];
+static uint8_t discover = true;
 
 int main(void)
 {
@@ -75,14 +73,30 @@ void sendToCloud(void)
 
 	if (shared_networking_params.haveAPConnection) // Do we really need this one?
 	{
+		if (discover)
+		{
+			discover = false;
+			debug_printIoTAppMsg("Application: Sending Discover Config");
+			mqttHeaderFlags flags = {.retain = 1};
+
+			sprintf(mqttPublishTopic[TOPIC_TEMPSENSORCONFIG], "homeassistant/sensor/%s_temp/config", eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			len = sprintf(json[TOPIC_TEMPSENSORCONFIG],
+			              "{\"device_class\": \"temperature\", \"name\": \"AVR IoT Temperature\", \"state_topic\": \"homeassistant/sensor/%s/state\", \"unit_of_measurement\": \"°C\", \"value_template\": \"{{ value_json.temp}}\" }", eeprom->mqttCID);
+			CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_TEMPSENSORCONFIG] ,(uint8_t*)json[TOPIC_TEMPSENSORCONFIG], len, flags);
+
+			sprintf(mqttPublishTopic[TOPIC_LIGHTSENSORCONFIG], "homeassistant/sensor/%s_light/config", eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			len = sprintf(json[TOPIC_LIGHTSENSORCONFIG],
+			              "{\"device_class\": \"illuminance\", \"name\": \"AVR IoT Light\", \"state_topic\": \"homeassistant/sensor/%s/state\", \"unit_of_measurement\": \"lx\", \"value_template\": \"{{ value_json.light}}\" }", eeprom->mqttCID);
+			CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_LIGHTSENSORCONFIG] ,(uint8_t*)json[TOPIC_LIGHTSENSORCONFIG], len, flags);					
+		}
 		debug_printIoTAppMsg("Application: Sending Sensor Data");
 		
 		rawTemperature = SENSORS_getTempValue();
 		light = SENSORS_getLightValue();
-		len = sprintf(json,"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
 
-		sprintf(lightandtemperaturetopic, "%s/sensor", eeprom->mqttCID); // Can optimize this a lot if never changing CID
-		CLOUD_publishData((uint8_t*)lightandtemperaturetopic ,(uint8_t*)json, len);
+		sprintf(mqttPublishTopic[TOPIC_SENSORSTATES], "homeassistant/sensor/%s/state", eeprom->mqttCID); // Can optimize this a lot if never changing CID
+		len = sprintf(json[TOPIC_SENSORSTATES],"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
+		CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_SENSORSTATES] ,(uint8_t*)json[TOPIC_SENSORSTATES], len, (mqttHeaderFlags){.All= 0});
 
 		ledParameterYellow.onTime = LED_BLIP;
 		ledParameterYellow.offTime = LED_BLIP;
