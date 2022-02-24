@@ -11,12 +11,12 @@ The discovery should replace the need to add this in configuration.yaml:
 sensor:
 - platform: mqtt
     name: "AVR.IoT Temperature"
-    state_topic: "<thing name>/sensor"
+    state_topic: "homeassistant/sensor/<thing name>/state"
     unit_of_measurement: "°C"
     value_template: "{{ value_json.temp }}"
 - platform: mqtt
     name: "AVR.IoT Light"
-    state_topic: "<thing name>/sensor"
+    state_topic: "homeassistant/sensor/<thing name>/state"
     unit_of_measurement: "lx"
     value_template: "{{ value_json.light }}"
 ```

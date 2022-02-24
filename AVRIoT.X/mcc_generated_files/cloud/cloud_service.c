@@ -119,6 +119,10 @@ void CLOUD_registerSubscription(uint8_t *topic, imqttHandlePublishDataFuncPtr su
 
 void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, mqttHeaderFlags flags)
 {
+	if (len > PAYLOAD_SIZE)
+	{
+		debug_printError("CLOUD: Payload is %s bytes, need to increase PAYLOAD_SIZE", len);
+	}
     cloudContext.cloudPublish(refToPublishTopic, data, len, flags);
 }
 

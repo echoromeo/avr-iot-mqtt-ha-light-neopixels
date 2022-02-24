@@ -34,7 +34,7 @@
 
 /********************MQTT Client configurations***********************/
 #define SUBSCRIBE_TOPIC_SIZE        100     //Defines the topic length that is supported when we process a published packet from the cloud
-#define PAYLOAD_SIZE                200     //Defines the payload size that is supported when we process a published packet
+#define PAYLOAD_SIZE                256     //Defines the payload size that is supported when we process a published packet
 #define PUBLISH_TOPIC_SIZE          80     //Defines the topic length when we send a publish packet 
 #define MQTT_CID_LENGTH 41
 #define NUM_TOPICS_SUBSCRIBE        1                        //Defines number of topics which can be subscribed
