@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "../utils/compiler.h"
 #include "../mqtt/mqtt_packetTransfer_interface.h"
+#include "../mqtt/mqtt_core/mqtt_core.h"
 
 
 #define CLOUD_PACKET_RECV_TABLE_SIZE	2
@@ -36,7 +37,7 @@ typedef union
 extern shared_networking_params_t shared_networking_params;
 
 void CLOUD_setupTask(char* deviceId);
-void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len);
+void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, mqttHeaderFlags flags);
 void CLOUD_registerSubscription(uint8_t *topic, imqttHandlePublishDataFuncPtr subscriptionCallback);
 bool CLOUD_checkIsConnected(void);
 void CLOUD_reset(void);

@@ -38,7 +38,7 @@ typedef void (*cloudInitPtr)(timerStruct_t*, timerStruct_t*);
 typedef int8_t (*cloudConnectSocketPtr)(uint32_t);
 typedef void (*cloudConnectAppProtocolPtr) (void);
 typedef void (*cloudSubscribePtr) (void);
-typedef void (*cloudPublishPtr) (uint8_t* , uint8_t*, uint16_t);
+typedef void (*cloudPublishPtr) (uint8_t* , uint8_t*, uint16_t, mqttHeaderFlags);
 typedef void (*cloudDisconnectPtr) (void);
 typedef bool (*cloudIsConnectedPtr) (void);
 typedef bool (*cloudIsDisconnectedPtr) (void);
@@ -59,7 +59,7 @@ void CLOUD_init(timerStruct_t* appProtocolTimeoutTaskTimer, timerStruct_t* cloud
 int8_t CLOUD_connectSocket(uint32_t ipAddress);
 void CLOUD_connectAppProtocol(void);
 void CLOUD_subscribe(void);
-void CLOUD_publish(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len);
+void CLOUD_publish(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, mqttHeaderFlags flags);
 void CLOUD_disconnect(void);
 bool CLOUD_isConnected(void);
 bool CLOUD_isDisconnected(void);

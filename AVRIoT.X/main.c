@@ -48,6 +48,7 @@
 #include "mcc_generated_files/time_service.h"
 #include "mcc_generated_files/cloud/cloud_service.h"
 #include "mcc_generated_files/cloud/mqtt_service.h"
+#include "mcc_generated_files/mqtt/mqtt_core/mqtt_core.h"
 
 static char mqttSubscribeTopic[SUBSCRIBE_TOPIC_SIZE];
 static char lightandtemperaturetopic[PUBLISH_TOPIC_SIZE];

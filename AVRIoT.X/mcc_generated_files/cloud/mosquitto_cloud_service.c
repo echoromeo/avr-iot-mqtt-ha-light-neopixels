@@ -152,9 +152,9 @@ void CLOUD_subscribe(void)
     }
 }
 
-void CLOUD_publish(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len)
+void CLOUD_publish(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, mqttHeaderFlags flags)
 {
-    MQTT_CLIENT_publish(refToPublishTopic, data, len);
+    MQTT_CLIENT_publish(refToPublishTopic, data, len, flags);
 }
 
 void CLOUD_disconnect(void)

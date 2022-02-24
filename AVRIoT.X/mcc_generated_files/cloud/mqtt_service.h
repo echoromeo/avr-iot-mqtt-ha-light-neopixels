@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../mqtt/mqtt_packetTransfer_interface.h"
+#include "../mqtt/mqtt_core/mqtt_core.h"
 
 
 extern char mosquittoEndpoint[];
@@ -47,7 +48,7 @@ typedef struct
 } publishReceptionHandler_t;
 
 
-void MQTT_CLIENT_publish(uint8_t* refToPublishTopic, uint8_t *data, uint16_t len);
+void MQTT_CLIENT_publish(uint8_t* refToPublishTopic, uint8_t *data, uint16_t len, mqttHeaderFlags flags);
 bool MQTT_CLIENT_subscribe(void);
 void MQTT_CLIENT_receive(uint8_t *data, uint8_t len);
 void MQTT_CLIENT_connect(void);

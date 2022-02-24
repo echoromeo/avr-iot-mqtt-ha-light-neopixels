@@ -83,14 +83,12 @@ publishReceptionHandler_t *MQTT_GetPublishReceptionHandlerTable()
 
 
 
-void MQTT_CLIENT_publish(uint8_t* refToPublishTopic, uint8_t *data, uint16_t len)
+void MQTT_CLIENT_publish(uint8_t* refToPublishTopic, uint8_t *data, uint16_t len, mqttHeaderFlags flags)
 {
 	 mqttPublishPacket cloudPublishPacket;
     
     // Fixed header
-    cloudPublishPacket.publishHeaderFlags.duplicate = 0;
-    cloudPublishPacket.publishHeaderFlags.qos = 0;
-    cloudPublishPacket.publishHeaderFlags.retain = 0;
+    cloudPublishPacket.publishHeaderFlags.All = flags.All;
         
     // Variable header
     cloudPublishPacket.topic = (uint8_t*)refToPublishTopic;

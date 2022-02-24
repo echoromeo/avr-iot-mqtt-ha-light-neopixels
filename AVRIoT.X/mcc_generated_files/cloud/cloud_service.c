@@ -117,9 +117,9 @@ void CLOUD_registerSubscription(uint8_t *topic, imqttHandlePublishDataFuncPtr su
     MQTT_SetPublishReceptionHandlerTable(imqtt_publishReceiveCallBackTable);
 }
 
-void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len)
+void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, mqttHeaderFlags flags)
 {
-    cloudContext.cloudPublish(refToPublishTopic, data, len);
+    cloudContext.cloudPublish(refToPublishTopic, data, len, flags);
 }
 
 bool CLOUD_checkIsConnected(void)
