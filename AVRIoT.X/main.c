@@ -51,7 +51,7 @@
 #define CONFIG_HA_NAME(name)					"\"name\": \""name"\""
 #define CONFIG_HA_NAME_VARIABLE					STRING_HA_NAME("%s")
 #define CONFIG_HA_SENSOR_STATE_VARIABLE			"\"stat_t\": \""TOPIC_HA_SENSOR_STATE_VARIABLE"\""
-#define CONFIG_HA_UNIT_TEMP						"\"unit_of_meas\": \"°°C\"" // ° does not work properly!
+#define CONFIG_HA_UNIT_TEMP						"\"unit_of_meas\": \"Â°C\"" // Â° does not work properly!
 #define CONFIG_HA_UNIT_LIGHT					"\"unit_of_meas\": \"lx\""
 #define CONFIG_HA_JSON_VALUE(value)				"\"val_tpl\": \"{{ value_json."value" }}\""
 
@@ -98,15 +98,6 @@ void sendToCloud(void)
 										CONFIG_HA_UNIT_TEMP ", "
 										CONFIG_HA_JSON_VALUE("temp") " }", 
 										eeprom->mqttCID);
-				for(uint8_t i=0;i<len;i++) // TODO: How do I fix the problem with ° == 0xC2B0 in a better way than this?
-				{ 
-					if (json[i] == '°')
-						{
-							json[i] = 0xc2; //
-							json[i+1] = 0xb0;
-							break;
-						}
-				}
 				CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
 				debug_printInfo("%s: %s", mqttPublishTopic,json);
 			} else {
