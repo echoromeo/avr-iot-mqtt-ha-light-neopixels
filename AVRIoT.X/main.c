@@ -43,13 +43,21 @@
 #include "mcc_generated_files/cloud/mqtt_service.h"
 #include "mcc_generated_files/mqtt/mqtt_core/mqtt_core.h"
 
-#define TOPIC_SENSORSTATES 0
-#define TOPIC_TEMPSENSORCONFIG 1
-#define TOPIC_LIGHTSENSORCONFIG 2
+#define TOPIC_HA_SENSOR_CONFIG_VARIABLE(name)	"homeassistant/sensor/%s"name"/config"
+#define TOPIC_HA_SENSOR_STATE_VARIABLE			"homeassistant/sensor/%s/state"
+
+#define CONFIG_HA_DEVICE_CLASS_TEMP				"\"dev_cla\": \"temperature\""
+#define CONFIG_HA_DEVICE_CLASS_LIGHT			"\"dev_cla\": \"illuminance\""
+#define CONFIG_HA_NAME(name)					"\"name\": \""name"\""
+#define CONFIG_HA_NAME_VARIABLE					STRING_HA_NAME("%s")
+#define CONFIG_HA_SENSOR_STATE_VARIABLE			"\"stat_t\": \""TOPIC_HA_SENSOR_STATE_VARIABLE"\""
+#define CONFIG_HA_UNIT_TEMP						"\"unit_of_meas\": \"°°C\"" // ° does not work properly!
+#define CONFIG_HA_UNIT_LIGHT					"\"unit_of_meas\": \"lx\""
+#define CONFIG_HA_JSON_VALUE(value)				"\"val_tpl\": \"{{ value_json."value" }}\""
 
 static char mqttSubscribeTopic[SUBSCRIBE_TOPIC_SIZE];
-static char mqttPublishTopic[3][PUBLISH_TOPIC_SIZE];
-static char json[3][PAYLOAD_SIZE];
+static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
+static char json[PAYLOAD_SIZE];
 static uint8_t discover = 2;
 
 int main(void)
@@ -83,26 +91,34 @@ void sendToCloud(void)
 			mqttHeaderFlags flags = {.retain = 1};
 
 			if (discover == 2) {
-				sprintf(mqttPublishTopic[TOPIC_TEMPSENSORCONFIG], "homeassistant/sensor/%s_temp/config", eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json[TOPIC_TEMPSENSORCONFIG],
-				"{\"dev_cla\": \"temperature\", \"name\": \"AVR IoT Temperature\", \"stat_t\": \"homeassistant/sensor/%s/state\", \"unit_of_meas\": \"°°C\", \"val_tpl\": \"{{ value_json.temp }}\" }", eeprom->mqttCID);
+				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+				len = sprintf(json, "{" CONFIG_HA_DEVICE_CLASS_TEMP ", "
+										CONFIG_HA_NAME("AVR IoT Temperature") ", "
+										CONFIG_HA_SENSOR_STATE_VARIABLE ", " // %s = eeprom->mqttCID
+										CONFIG_HA_UNIT_TEMP ", "
+										CONFIG_HA_JSON_VALUE("temp") " }", 
+										eeprom->mqttCID);
 				for(uint8_t i=0;i<len;i++) // TODO: How do I fix the problem with ° == 0xC2B0 in a better way than this?
 				{ 
-					if (json[TOPIC_TEMPSENSORCONFIG][i] == '°')
+					if (json[i] == '°')
 						{
-							json[TOPIC_TEMPSENSORCONFIG][i] = 0xc2; //
-							json[TOPIC_TEMPSENSORCONFIG][i+1] = 0xb0;
+							json[i] = 0xc2; //
+							json[i+1] = 0xb0;
 							break;
 						}
 				}
-				CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_TEMPSENSORCONFIG] ,(uint8_t*)json[TOPIC_TEMPSENSORCONFIG], len, flags);
-				debug_printInfo("%s: %s", mqttPublishTopic[TOPIC_TEMPSENSORCONFIG],json[TOPIC_TEMPSENSORCONFIG]);
+				CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
+				debug_printInfo("%s: %s", mqttPublishTopic,json);
 			} else {
-				sprintf(mqttPublishTopic[TOPIC_LIGHTSENSORCONFIG], "homeassistant/sensor/%s_light/config", eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json[TOPIC_LIGHTSENSORCONFIG],
-				"{\"dev_cla\": \"illuminance\", \"name\": \"AVR IoT Light\", \"stat_t\": \"homeassistant/sensor/%s/state\", \"unit_of_meas\": \"lx\", \"val_tpl\": \"{{ value_json.light }}\" }", eeprom->mqttCID);
-				CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_LIGHTSENSORCONFIG] ,(uint8_t*)json[TOPIC_LIGHTSENSORCONFIG], len, flags);
-				debug_printInfo("%s: %s", mqttPublishTopic[TOPIC_LIGHTSENSORCONFIG],json[TOPIC_LIGHTSENSORCONFIG]);
+				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+				len = sprintf(json, "{" CONFIG_HA_DEVICE_CLASS_LIGHT ", "
+										CONFIG_HA_NAME("AVR IoT Light") ", "
+										CONFIG_HA_SENSOR_STATE_VARIABLE ", " // %s = eeprom->mqttCID
+										CONFIG_HA_UNIT_LIGHT ", "
+										CONFIG_HA_JSON_VALUE("light") " }",
+										eeprom->mqttCID);
+				CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
+				debug_printInfo("%s: %s", mqttPublishTopic,json);
 			}
 			discover--;
 
@@ -112,9 +128,9 @@ void sendToCloud(void)
 			rawTemperature = SENSORS_getTempValue();
 			light = SENSORS_getLightValue();
 
-			sprintf(mqttPublishTopic[TOPIC_SENSORSTATES], "homeassistant/sensor/%s/state", eeprom->mqttCID); // Can optimize this a lot if never changing CID
-			len = sprintf(json[TOPIC_SENSORSTATES],"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
-			CLOUD_publishData((uint8_t*)mqttPublishTopic[TOPIC_SENSORSTATES] ,(uint8_t*)json[TOPIC_SENSORSTATES], len, (mqttHeaderFlags){.All= 0});
+			sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_STATE_VARIABLE, eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			len = sprintf(json,"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
+			CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, (mqttHeaderFlags){.All= 0});
 		}
 
 		ledParameterYellow.onTime = LED_BLIP;
