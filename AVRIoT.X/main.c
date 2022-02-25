@@ -108,15 +108,16 @@ void sendToCloud(void)
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(
 										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
-//										CONFIG_HA_DEVICE_CLASS_TEMP ","
+										CONFIG_HA_DEVICE_CLASS_TEMP ","
+										CONFIG_HA_DEVICE_NAME("AVR IoT Temperature") ","
 										CONFIG_HA_ID_VARIABLE("_temp") "," // %s = eeprom->mqttCID
 										CONFIG_HA_STATE() ", "
 										CONFIG_HA_UNIT_TEMP ", "
 										CONFIG_HA_JSON_VALUE("temp") ","
 										CONFIG_HA_DEVICE(
 											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
-											CONFIG_HA_DEVICE_NAME("AVR IoT") //","
-//											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
+											CONFIG_HA_DEVICE_NAME("AVR IoT") ","
+											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
 											)
 										),
 										eeprom->mqttCID,
@@ -127,15 +128,16 @@ void sendToCloud(void)
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(
 										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
-//										CONFIG_HA_DEVICE_CLASS_LIGHT ","
+										CONFIG_HA_DEVICE_CLASS_LIGHT ","
+										CONFIG_HA_DEVICE_NAME("AVR IoT Light") ","
 										CONFIG_HA_ID_VARIABLE("_light") "," // %s = eeprom->mqttCID
 										CONFIG_HA_STATE() ","
 										CONFIG_HA_UNIT_LIGHT ","
 										CONFIG_HA_JSON_VALUE("light") ","
 										CONFIG_HA_DEVICE(
 											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
-											CONFIG_HA_DEVICE_NAME("AVR IoT") //","
-//											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
+											CONFIG_HA_DEVICE_NAME("AVR IoT") ","
+											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
 										)
 									),
 									eeprom->mqttCID,
