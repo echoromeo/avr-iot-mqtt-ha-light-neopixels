@@ -61,7 +61,7 @@
 #define CONFIG_HA_JSON_VALUE(value)						"\"val_tpl\":\"{{value_json."value"}}\""
 
 #define CONFIG_HA_DEVICE(content)						"\"dev\":{"content"}"
-#define CONFIG_HA_DEVICE_IDENTIFIERS(content)			"\"ids\":\""content"\""
+#define CONFIG_HA_DEVICE_IDENTIFIERS(content)			"\"ids\":"content
 #define CONFIG_HA_DEVICE_NAME(name)						"\"name\":\""name"\""
 #define CONFIG_HA_DEVICE_MANUFACTURER(name)				"\"mf\":\""name"\""
 #define CONFIG_HA_DEVICE_MODEL(name)					"\"mdl\":\""name"\""
@@ -107,36 +107,38 @@ void sendToCloud(void)
 			if (discover == 2) {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(
-										CONFIG_HA_PREFIX_VARIABLE("sensor") ", " // %s = eeprom->mqttCID
-										CONFIG_HA_DEVICE_CLASS_TEMP ", "
-										CONFIG_HA_ID_VARIABLE("_temp") ", " // %s = eeprom->mqttCID
+										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
+//										CONFIG_HA_DEVICE_CLASS_TEMP ","
+										CONFIG_HA_ID_VARIABLE("_temp") "," // %s = eeprom->mqttCID
 										CONFIG_HA_STATE() ", "
 										CONFIG_HA_UNIT_TEMP ", "
-										CONFIG_HA_JSON_VALUE("temp") ", "
+										CONFIG_HA_JSON_VALUE("temp") ","
 										CONFIG_HA_DEVICE(
-											CONFIG_HA_DEVICE_IDENTIFIERS("%s") ", "
-											CONFIG_HA_DEVICE_NAME("AVR IoT") ", "
-											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
-										)
-									), 
-									eeprom->mqttCID,
-									eeprom->mqttCID,
-									eeprom->mqttCID);
+											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
+											CONFIG_HA_DEVICE_NAME("AVR IoT") //","
+//											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
+											)
+										),
+										eeprom->mqttCID,
+										eeprom->mqttCID,
+										eeprom->mqttCID,
+										eeprom->mqttCID);
 			} else {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(
-										CONFIG_HA_PREFIX_VARIABLE("sensor") ", " // %s = eeprom->mqttCID
-										CONFIG_HA_DEVICE_CLASS_LIGHT ", "
-										CONFIG_HA_ID_VARIABLE("_light") ", " // %s = eeprom->mqttCID
-										CONFIG_HA_STATE() ", "
-										CONFIG_HA_UNIT_LIGHT ", "
-										CONFIG_HA_JSON_VALUE("light") ", "
+										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
+//										CONFIG_HA_DEVICE_CLASS_LIGHT ","
+										CONFIG_HA_ID_VARIABLE("_light") "," // %s = eeprom->mqttCID
+										CONFIG_HA_STATE() ","
+										CONFIG_HA_UNIT_LIGHT ","
+										CONFIG_HA_JSON_VALUE("light") ","
 										CONFIG_HA_DEVICE(
-											CONFIG_HA_DEVICE_IDENTIFIERS("%s") ", "
-											CONFIG_HA_DEVICE_NAME("AVR IoT") ", "
-											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
+											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
+											CONFIG_HA_DEVICE_NAME("AVR IoT") //","
+//											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
 										)
 									),
+									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID);
@@ -154,7 +156,7 @@ void sendToCloud(void)
 		}
 
 		CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
-		debug_printInfo("%s: %s", mqttPublishTopic,json);
+		debug_printInfo("%s: %s (%d)", mqttPublishTopic, json, len);
 
 		ledParameterYellow.onTime = LED_BLIP;
 		ledParameterYellow.offTime = LED_BLIP;

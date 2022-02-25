@@ -121,7 +121,7 @@ void CLOUD_publishData(uint8_t* refToPublishTopic, uint8_t* data, uint16_t len, 
 {
 	if (len > PAYLOAD_SIZE)
 	{
-		debug_printError("CLOUD: Payload is %s bytes, need to increase PAYLOAD_SIZE", len);
+		debug_printError("CLOUD: Payload is %d bytes, need to increase PAYLOAD_SIZE", len);
 	}
     cloudContext.cloudPublish(refToPublishTopic, data, len, flags);
 }
