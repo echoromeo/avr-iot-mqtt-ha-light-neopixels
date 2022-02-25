@@ -37,7 +37,7 @@
 #define PAYLOAD_SIZE                256     //Defines the payload size that is supported when we process a published packet
 #define PUBLISH_TOPIC_SIZE          80     //Defines the topic length when we send a publish packet 
 #define MQTT_CID_LENGTH 41
-#define NUM_TOPICS_SUBSCRIBE        1                        //Defines number of topics which can be subscribed
+#define NUM_TOPICS_SUBSCRIBE        2                        //Defines number of topics which can be subscribed
 #define NUM_TOPICS_UNSUBSCRIBE      NUM_TOPICS_SUBSCRIBE	// The MQTT client can unsubscribe only from those topics to which it has already subscribed
 
 // MCC generated parameters
