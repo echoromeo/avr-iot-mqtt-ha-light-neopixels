@@ -177,6 +177,7 @@
         <itemPath>mcc_generated_files/CryptoAuth_init.h</itemPath>
         <itemPath>mcc_generated_files/cryptoauthlib_config.h</itemPath>
       </logicalFolder>
+      <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -214,7 +215,7 @@
           <itemPath>mcc_generated_files/cloud/cloud_service.c</itemPath>
           <itemPath>mcc_generated_files/cloud/wifi_service.c</itemPath>
           <itemPath>mcc_generated_files/cloud/mqtt_service.c</itemPath>
-          <itemPath>mcc_generated_files/cloud/aws_cloud_service.c</itemPath>
+          <itemPath>mcc_generated_files/cloud/mosquitto_cloud_service.c</itemPath>
         </logicalFolder>
         <logicalFolder name="f3" displayName="credentials_storage" projectFiles="true">
           <itemPath>mcc_generated_files/credentials_storage/credentials_storage.c</itemPath>
@@ -361,7 +362,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>mcc_generated_files</Elem>
+    <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -377,7 +378,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="ATmega_DFP" vendor="Microchip" version="3.0.153"/>
+        <pack name="ATmega_DFP" vendor="Microchip" version="2.4.131"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
