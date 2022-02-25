@@ -43,16 +43,21 @@
 #include "mcc_generated_files/cloud/mqtt_service.h"
 #include "mcc_generated_files/mqtt/mqtt_core/mqtt_core.h"
 
-#define TOPIC_HA_SENSOR_CONFIG_VARIABLE(name)	"homeassistant/sensor/%s"name"/config"
-#define TOPIC_HA_SENSOR_STATE_VARIABLE			"homeassistant/sensor/%s/state"
+#define HA_TOPIC_VARIABLE(type)							"homeassistant/"type"/%s"
+#define TOPIC_HA_SENSOR_VARIABLE(extra_id)				HA_TOPIC_VARIABLE("sensor") extra_id
+#define TOPIC_HA_SENSOR_STATE_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/state"
+#define TOPIC_HA_SENSOR_COMMAND_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/set"
+#define TOPIC_HA_SENSOR_CONFIG_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/config"
 
-#define CONFIG_HA_DEVICE_CLASS_TEMP				"\"dev_cla\": \"temperature\""
-#define CONFIG_HA_DEVICE_CLASS_LIGHT			"\"dev_cla\": \"illuminance\""
-#define CONFIG_HA_OBJ_ID_VARIABLE(name)			"\"obj_id\": \"%s"name"\""
-#define CONFIG_HA_SENSOR_STATE_VARIABLE			"\"stat_t\": \""TOPIC_HA_SENSOR_STATE_VARIABLE"\""
-#define CONFIG_HA_UNIT_TEMP						"\"unit_of_meas\": \"°C\"" // Need utf-8 formatting on the file for ° to work!
-#define CONFIG_HA_UNIT_LIGHT					"\"unit_of_meas\": \"lx\""
-#define CONFIG_HA_JSON_VALUE(value)				"\"val_tpl\": \"{{ value_json."value" }}\""
+#define CONFIG_HA_PREFIX_VARIABLE(type)					"\"~\": \""HA_TOPIC_VARIABLE(type)"\""
+#define CONFIG_HA_DEVICE_CLASS_TEMP						"\"dev_cla\": \"temperature\""
+#define CONFIG_HA_DEVICE_CLASS_LIGHT					"\"dev_cla\": \"illuminance\""
+#define CONFIG_HA_OBJ_ID_VARIABLE(name)					"\"obj_id\": \"%s"name"\""
+#define CONFIG_HA_STATE(extra_id)						"\"stat_t\": \"~"extra_id"/state\""
+#define CONFIG_HA_COMMAND(extra_id)						"\"cmd_t\": \"~"extra_id"/set\""
+#define CONFIG_HA_UNIT_TEMP								"\"unit_of_meas\": \"°C\"" // Need utf-8 formatting on the file for ° to work!
+#define CONFIG_HA_UNIT_LIGHT							"\"unit_of_meas\": \"lx\""
+#define CONFIG_HA_JSON_VALUE(value)						"\"val_tpl\": \"{{ value_json."value" }}\""
 
 static char mqttSubscribeTopic[SUBSCRIBE_TOPIC_SIZE];
 static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
@@ -92,18 +97,20 @@ void sendToCloud(void)
 
 			if (discover == 2) {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json, "{" CONFIG_HA_DEVICE_CLASS_TEMP ", "
+				len = sprintf(json, "{" CONFIG_HA_PREFIX_VARIABLE("sensor") ", " // %s = eeprom->mqttCID
+										CONFIG_HA_DEVICE_CLASS_TEMP ", "
 										CONFIG_HA_OBJ_ID_VARIABLE("_temp") ", " // %s = eeprom->mqttCID
-										CONFIG_HA_SENSOR_STATE_VARIABLE ", " // %s = eeprom->mqttCID
+										CONFIG_HA_STATE() ", "
 										CONFIG_HA_UNIT_TEMP ", "
 										CONFIG_HA_JSON_VALUE("temp") " }", 
 										eeprom->mqttCID,
 										eeprom->mqttCID);
 			} else {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json, "{" CONFIG_HA_DEVICE_CLASS_LIGHT ", "
+				len = sprintf(json, "{" CONFIG_HA_PREFIX_VARIABLE("sensor") ", " // %s = eeprom->mqttCID
+										CONFIG_HA_DEVICE_CLASS_LIGHT ", "
 										CONFIG_HA_OBJ_ID_VARIABLE("_light") ", " // %s = eeprom->mqttCID
-										CONFIG_HA_SENSOR_STATE_VARIABLE ", " // %s = eeprom->mqttCID
+										CONFIG_HA_STATE() ", "
 										CONFIG_HA_UNIT_LIGHT ", "
 										CONFIG_HA_JSON_VALUE("light") " }",
 										eeprom->mqttCID,
@@ -117,7 +124,7 @@ void sendToCloud(void)
 			rawTemperature = SENSORS_getTempValue();
 			light = SENSORS_getLightValue();
 
-			sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_STATE_VARIABLE, eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_STATE_VARIABLE(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 			len = sprintf(json,"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
 		}
 
@@ -132,7 +139,7 @@ void sendToCloud(void)
 
 void subscribeToCloud(void)
 {
-	sprintf(mqttSubscribeTopic, "%s/test", eeprom->mqttCID); // Can optimize this a lot if never changing CID
+	sprintf(mqttSubscribeTopic, TOPIC_HA_SENSOR_COMMAND_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 	CLOUD_registerSubscription((uint8_t*)mqttSubscribeTopic,receivedFromCloud);
 }
 
