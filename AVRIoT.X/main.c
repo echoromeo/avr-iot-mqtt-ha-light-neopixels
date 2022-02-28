@@ -102,7 +102,11 @@ void sendToCloud(void)
 		if (discover)
 		{
 			debug_printIoTAppMsg("Application: Sending Discover Config %");
-			flags.retain = 1;
+			#ifdef DEBUG
+				flags.retain = 0;
+			#else
+				flags.retain = 1;
+			#endif
 
 			if (discover == 2) {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
