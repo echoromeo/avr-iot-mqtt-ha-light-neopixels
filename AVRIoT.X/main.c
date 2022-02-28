@@ -72,9 +72,10 @@
 
 // Is it enough to send this with one of the config topics? or a completely separate one?
 #define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") \
-														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT") \
-														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR IoT Sensor Node") \
-														NEXTCFG CONFIG_HA_DEVICE_SW_VERSION("5.1.0"))
+														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT") \
+														NEXTCFG CONFIG_HA_DEVICE_MANUFACTURER("Microchip Technology") \
+														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR-IoT Sensor Node") \
+														NEXTCFG CONFIG_HA_DEVICE_SW_VERSION("6.1.0"))
 
 static char mqttSubscribeTopic[NUM_TOPICS_SUBSCRIBE][SUBSCRIBE_TOPIC_SIZE];
 static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
@@ -121,7 +122,7 @@ void sendToCloud(void)
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_ADDCID("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_TEMP
-										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Temperature")
+										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT Temperature")
 										NEXTCFG CONFIG_HA_ID_ADDCID("_temp") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_EXPIRE_AFTER("300")
 										NEXTCFG CONFIG_HA_ICON_MDI("thermometer-lines")
@@ -137,7 +138,7 @@ void sendToCloud(void)
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_ADDCID("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_LIGHT 
-										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Light") 
+										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT Light") 
 										NEXTCFG CONFIG_HA_ID_ADDCID("_light") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_ICON_MDI("sun-wireless-outline")
 										NEXTCFG CONFIG_HA_EXPIRE_AFTER("30")
