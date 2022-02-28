@@ -51,9 +51,10 @@
 
 #define CONFIG_HA(content)								"{"content"}"
 #define CONFIG_HA_PREFIX_ADDCID(type)					"\"~\": \""HA_TOPIC_ADDCID(type)"\""
-#define CONFIG_HA_DEVICE_CLASS_TEMP						"\"dev_cla\":\"temperature\""
-#define CONFIG_HA_DEVICE_CLASS_LIGHT					"\"dev_cla\":\"illuminance\""
-#define CONFIG_HA_ID_ADDCID(name)						"\"uniq_id\":\"%s"name"\""
+#define CONFIG_HA_DEVICE_CLASS(type)					"\"dev_cla\":\""type"\""
+#define CONFIG_HA_DEVICE_CLASS_TEMP						CONFIG_HA_DEVICE_CLASS("temperature")
+#define CONFIG_HA_DEVICE_CLASS_LIGHT					CONFIG_HA_DEVICE_CLASS("illuminance")
+#define CONFIG_HA_ID_ADDCID(name)						"\"uniq_id\":\""name"%s\",\"obj_id\":\""name"%s\""
 #define CONFIG_HA_STATE(extra_id)						"\"stat_t\":\"~"extra_id"/state\""
 #define CONFIG_HA_COMMAND(extra_id)						"\"cmd_t\":\"~"extra_id"/set\""
 #define CONFIG_HA_UNIT_TEMP								"\"unit_of_meas\":\"°C\"" // Need utf-8 formatting on the file for ° to work!
@@ -71,7 +72,7 @@
 #define CONFIG_HA_DEVICE_SW_VERSION(version)			"\"sw\":\""version"\""
 
 // Is it enough to send this with one of the config topics? or a completely separate one?
-#define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") \
+#define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"temp_%s\", \"light_%s\"]") \
 														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT") \
 														NEXTCFG CONFIG_HA_DEVICE_MANUFACTURER("Microchip Technology") \
 														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR-IoT Sensor Node") \
@@ -123,29 +124,31 @@ void sendToCloud(void)
 				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_TEMP
 										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT Temperature")
-										NEXTCFG CONFIG_HA_ID_ADDCID("_temp") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_ID_ADDCID("temp_") // 2x %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_EXPIRE_AFTER("300")
 										NEXTCFG CONFIG_HA_ICON_MDI("thermometer-lines")
 										NEXTCFG CONFIG_HA_STATE()
 										NEXTCFG CONFIG_HA_UNIT_TEMP
 										NEXTCFG CONFIG_HA_JSON_VALUE("temp")
 										NEXTCFG CONFIG_HA_THIS_DEVICE), // 2x %s = eeprom->mqttCID
-										eeprom->mqttCID,
-										eeprom->mqttCID,
-										eeprom->mqttCID,
-										eeprom->mqttCID);
+									eeprom->mqttCID,
+									eeprom->mqttCID,
+									eeprom->mqttCID,
+									eeprom->mqttCID,
+									eeprom->mqttCID);
 			} else if (discover == 0) {
 				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_ADDCID("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_LIGHT 
 										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT Light") 
-										NEXTCFG CONFIG_HA_ID_ADDCID("_light") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_ID_ADDCID("light_") // 2x %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_ICON_MDI("sun-wireless-outline")
 										NEXTCFG CONFIG_HA_EXPIRE_AFTER("30")
 										NEXTCFG CONFIG_HA_STATE() 
 										NEXTCFG CONFIG_HA_UNIT_LIGHT 
 										NEXTCFG CONFIG_HA_JSON_VALUE("light")
 										NEXTCFG CONFIG_HA_THIS_DEVICE), // 2x %s = eeprom->mqttCID
+									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID,
