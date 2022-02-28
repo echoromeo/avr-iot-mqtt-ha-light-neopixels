@@ -64,6 +64,8 @@
                         "version" NEWLINE\
                         "cli_version" NEWLINE\
                         "wifi <ssid>[,<pass>,[authType]]" NEWLINE\
+                        "mqtt [<user>],[<pass>],[cid]" NEWLINE\
+                        "broker <address>,<port>,<addresstype>" NEWLINE\
                         "debug" NEWLINE\
                         "--------------------------------------------"NEWLINE"\4"
 
@@ -81,7 +83,7 @@ static void reset_cmd(char *pArg);
 static void reconnect_cmd(char *pArg);
 static void set_wifi_auth(char *ssid_pwd_auth);
 static void set_mqtt_auth(char *mqtt_auth);
-static void set_host(char *addr_port_type);
+static void set_mqtt_broker(char *addr_port_type);
 static void get_thing_name(char *pArg);
 static void get_device_id(char *pArg);
 static void get_cli_version(char *pArg);
@@ -106,7 +108,7 @@ const struct cmd commands[] =
     { "reconnect",   reconnect_cmd },
     { "wifi",        set_wifi_auth },
     { "mqtt",        set_mqtt_auth},
-    { "host",        set_host},
+    { "broker",      set_mqtt_broker},
     { "thing",       get_thing_name },
     { "device",      get_device_id },
     { "cli_version", get_cli_version },
@@ -300,7 +302,7 @@ static void set_mqtt_auth(char *mqtt_auth)
 /*
  * Function to set broker address and port
  */
-static void set_host(char *addr_port_type)
+static void set_mqtt_broker(char *addr_port_type)
 {
 	char * credentials[3]; //address, port, type
 	char * pch;
