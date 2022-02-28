@@ -34,10 +34,10 @@
 
 /********************MQTT Client configurations***********************/
 #define SUBSCRIBE_TOPIC_SIZE        100     //Defines the topic length that is supported when we process a published packet from the cloud
-#define PAYLOAD_SIZE                512     //Defines the payload size that is supported when we process a published packet
-#define PUBLISH_TOPIC_SIZE          80     //Defines the topic length when we send a publish packet 
-#define MQTT_CID_LENGTH 41
-#define NUM_TOPICS_SUBSCRIBE        2                        //Defines number of topics which can be subscribed
+#define PUBLISH_TOPIC_SIZE          80      //Defines the topic length that is supported when we send a publish packet to the cloud
+#define PAYLOAD_SIZE                512     //Defines the payload size that is supported when we process a packet
+#define MQTT_CID_LENGTH				41
+#define NUM_TOPICS_SUBSCRIBE        2                       //Defines number of topics which can be subscribed
 #define NUM_TOPICS_UNSUBSCRIBE      NUM_TOPICS_SUBSCRIBE	// The MQTT client can unsubscribe only from those topics to which it has already subscribed
 
 // MCC generated parameters
@@ -45,8 +45,8 @@
 #define CFG_MQTT_HOSTURL "192.168.1.10"
 #define CFG_MQTT_SERVERIPv4_HEX
 #define CFG_MQTT_CONN_TIMEOUT 60
-#define CFG_MQTT_TXBUFFER_SIZE 400
-#define CFG_MQTT_RXBUFFER_SIZE 400
+#define CFG_MQTT_TXBUFFER_SIZE (PUBLISH_TOPIC_SIZE+PAYLOAD_SIZE+2)
+#define CFG_MQTT_RXBUFFER_SIZE (SUBSCRIBE_TOPIC_SIZE+PAYLOAD_SIZE+2)
 #define CFG_MQTT_USERNAME "mchpUser"
 #define CFG_MQTT_PASSWORD "microchip"
 #define CFG_MQTT_CID "" // If empty it will be filled with the ECC608 serial
