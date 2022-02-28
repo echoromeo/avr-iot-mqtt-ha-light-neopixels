@@ -43,22 +43,23 @@
 #include "mcc_generated_files/cloud/mqtt_service.h"
 #include "mcc_generated_files/mqtt/mqtt_core/mqtt_core.h"
 
-#define HA_TOPIC_VARIABLE(type)							"homeassistant/"type"/%s"
-#define TOPIC_HA_SENSOR_VARIABLE(extra_id)				HA_TOPIC_VARIABLE("sensor") extra_id
-#define TOPIC_HA_SENSOR_STATE_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/state"
-#define TOPIC_HA_SENSOR_COMMAND_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/set"
-#define TOPIC_HA_SENSOR_CONFIG_VARIABLE(extra_id)		HA_TOPIC_VARIABLE("sensor") extra_id "/config"
+#define HA_TOPIC_ADDCID(type)							"homeassistant/"type"/%s"
+#define TOPIC_HA_SENSOR_ADDCID(extra_id)				HA_TOPIC_ADDCID("sensor") extra_id
+#define TOPIC_HA_SENSOR_STATE_ADDCID(extra_id)			HA_TOPIC_ADDCID("sensor") extra_id "/state"
+#define TOPIC_HA_SENSOR_COMMAND_ADDCID(extra_id)		HA_TOPIC_ADDCID("sensor") extra_id "/set"
+#define TOPIC_HA_SENSOR_CONFIG_ADDCID(extra_id)			HA_TOPIC_ADDCID("sensor") extra_id "/config"
 
 #define CONFIG_HA(content)								"{"content"}"
-#define CONFIG_HA_PREFIX_VARIABLE(type)					"\"~\": \""HA_TOPIC_VARIABLE(type)"\""
+#define CONFIG_HA_PREFIX_ADDCID(type)					"\"~\": \""HA_TOPIC_ADDCID(type)"\""
 #define CONFIG_HA_DEVICE_CLASS_TEMP						"\"dev_cla\":\"temperature\""
 #define CONFIG_HA_DEVICE_CLASS_LIGHT					"\"dev_cla\":\"illuminance\""
-#define CONFIG_HA_ID_VARIABLE(name)						"\"uniq_id\":\"%s"name"\""
+#define CONFIG_HA_ID_ADDCID(name)						"\"uniq_id\":\"%s"name"\""
 #define CONFIG_HA_STATE(extra_id)						"\"stat_t\":\"~"extra_id"/state\""
 #define CONFIG_HA_COMMAND(extra_id)						"\"cmd_t\":\"~"extra_id"/set\""
 #define CONFIG_HA_UNIT_TEMP								"\"unit_of_meas\":\"°C\"" // Need utf-8 formatting on the file for ° to work!
 #define CONFIG_HA_UNIT_LIGHT							"\"unit_of_meas\":\"lx\""
 #define CONFIG_HA_JSON_VALUE(value)						"\"val_tpl\":\"{{value_json."value"}}\""
+#define NEXTCFG 										","
 
 #define CONFIG_HA_DEVICE(content)						"\"dev\":{"content"}"
 #define CONFIG_HA_DEVICE_IDENTIFIERS(content)			"\"ids\":"content
@@ -67,6 +68,11 @@
 #define CONFIG_HA_DEVICE_MODEL(name)					"\"mdl\":\""name"\""
 #define CONFIG_HA_DEVICE_SW_VERSION(version)			"\"sw\":\""version"\""
 
+// Is it enough to send this with one of the config topics? or a completely separate one?
+#define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") \
+														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT") \
+														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR IoT Sensor Node") \
+														NEXTCFG CONFIG_HA_DEVICE_SW_VERSION("5.1.0"))
 
 static char mqttSubscribeTopic[NUM_TOPICS_SUBSCRIBE][SUBSCRIBE_TOPIC_SIZE];
 static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
@@ -101,6 +107,7 @@ void sendToCloud(void)
 	{
 		if (discover)
 		{
+			discover--;
 			debug_printIoTAppMsg("Application: Sending Discover Config %");
 			#ifdef DEBUG
 				flags.retain = 0;
@@ -108,48 +115,35 @@ void sendToCloud(void)
 				flags.retain = 1;
 			#endif
 
-			if (discover == 2) {
-				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json, CONFIG_HA(
-										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
-										CONFIG_HA_DEVICE_CLASS_TEMP ","
-										CONFIG_HA_DEVICE_NAME("AVR IoT Temperature") ","
-										CONFIG_HA_ID_VARIABLE("_temp") "," // %s = eeprom->mqttCID
-										CONFIG_HA_STATE() ", "
-										CONFIG_HA_UNIT_TEMP ", "
-										CONFIG_HA_JSON_VALUE("temp") ","
-										CONFIG_HA_DEVICE(
-											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
-											CONFIG_HA_DEVICE_NAME("AVR IoT") ","
-											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
-											)
-										),
+			if (discover == 1) {
+				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_ADDCID("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_DEVICE_CLASS_TEMP
+										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Temperature")
+										NEXTCFG CONFIG_HA_ID_ADDCID("_temp") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_STATE()
+										NEXTCFG CONFIG_HA_UNIT_TEMP
+										NEXTCFG CONFIG_HA_JSON_VALUE("temp")
+										NEXTCFG CONFIG_HA_THIS_DEVICE), // 2x %s = eeprom->mqttCID
 										eeprom->mqttCID,
 										eeprom->mqttCID,
 										eeprom->mqttCID,
 										eeprom->mqttCID);
-			} else {
-				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-				len = sprintf(json, CONFIG_HA(
-										CONFIG_HA_PREFIX_VARIABLE("sensor") "," // %s = eeprom->mqttCID
-										CONFIG_HA_DEVICE_CLASS_LIGHT ","
-										CONFIG_HA_DEVICE_NAME("AVR IoT Light") ","
-										CONFIG_HA_ID_VARIABLE("_light") "," // %s = eeprom->mqttCID
-										CONFIG_HA_STATE() ","
-										CONFIG_HA_UNIT_LIGHT ","
-										CONFIG_HA_JSON_VALUE("light") ","
-										CONFIG_HA_DEVICE(
-											CONFIG_HA_DEVICE_IDENTIFIERS("[\"%s_temp\", \"%s_light\"]") ","
-											CONFIG_HA_DEVICE_NAME("AVR IoT") ","
-											CONFIG_HA_DEVICE_MANUFACTURER("Microchip")
-										)
-									),
+			} else if (discover == 0) {
+				sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_CONFIG_ADDCID("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("sensor") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_DEVICE_CLASS_LIGHT 
+										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Light") 
+										NEXTCFG CONFIG_HA_ID_ADDCID("_light") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_STATE() 
+										NEXTCFG CONFIG_HA_UNIT_LIGHT 
+										NEXTCFG CONFIG_HA_JSON_VALUE("light")
+										NEXTCFG CONFIG_HA_THIS_DEVICE), // 2x %s = eeprom->mqttCID
 									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID,
 									eeprom->mqttCID);
 			}
-			discover--;
 
 		}  else {
 			debug_printIoTAppMsg("Application: Sending Sensor Data");
@@ -157,12 +151,14 @@ void sendToCloud(void)
 			rawTemperature = SENSORS_getTempValue();
 			light = SENSORS_getLightValue();
 
-			sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_STATE_VARIABLE(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			sprintf(mqttPublishTopic, TOPIC_HA_SENSOR_STATE_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 			len = sprintf(json,"{\"light\":%d,\"temp\":%d.%02d}", light,rawTemperature/100,abs(rawTemperature)%100);
 		}
 
-		CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
-		debug_printInfo("%s: %s (%d)", mqttPublishTopic, json, len);
+		if (len) {
+			CLOUD_publishData((uint8_t*)mqttPublishTopic ,(uint8_t*)json, len, flags);
+			debug_printInfo("%s: %s (%d)", mqttPublishTopic, json, len);			
+		}
 
 		ledParameterYellow.onTime = LED_BLIP;
 		ledParameterYellow.offTime = LED_BLIP;
@@ -172,9 +168,9 @@ void sendToCloud(void)
 
 void subscribeToCloud(void)
 {
-	sprintf(mqttSubscribeTopic[0], TOPIC_HA_SENSOR_COMMAND_VARIABLE("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+	sprintf(mqttSubscribeTopic[0], TOPIC_HA_SENSOR_COMMAND_ADDCID("_temp"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 	CLOUD_registerSubscription((uint8_t*)mqttSubscribeTopic[0],receivedFromCloud);
-	sprintf(mqttSubscribeTopic[0], TOPIC_HA_SENSOR_COMMAND_VARIABLE("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+	sprintf(mqttSubscribeTopic[0], TOPIC_HA_SENSOR_COMMAND_ADDCID("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 	CLOUD_registerSubscription((uint8_t*)mqttSubscribeTopic[0],receivedFromCloud);
 }
 
