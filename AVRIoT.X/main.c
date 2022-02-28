@@ -59,6 +59,8 @@
 #define CONFIG_HA_UNIT_TEMP								"\"unit_of_meas\":\"°C\"" // Need utf-8 formatting on the file for ° to work!
 #define CONFIG_HA_UNIT_LIGHT							"\"unit_of_meas\":\"lx\""
 #define CONFIG_HA_JSON_VALUE(value)						"\"val_tpl\":\"{{value_json."value"}}\""
+#define CONFIG_HA_EXPIRE_AFTER(value)					"\"expire_after\":"value
+#define CONFIG_HA_ICON_MDI(name)						"\"icon\":\"mdi:"name"\""
 #define NEXTCFG 										","
 
 #define CONFIG_HA_DEVICE(content)						"\"dev\":{"content"}"
@@ -121,6 +123,8 @@ void sendToCloud(void)
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_TEMP
 										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Temperature")
 										NEXTCFG CONFIG_HA_ID_ADDCID("_temp") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_EXPIRE_AFTER("300")
+										NEXTCFG CONFIG_HA_ICON_MDI("thermometer-lines")
 										NEXTCFG CONFIG_HA_STATE()
 										NEXTCFG CONFIG_HA_UNIT_TEMP
 										NEXTCFG CONFIG_HA_JSON_VALUE("temp")
@@ -135,6 +139,8 @@ void sendToCloud(void)
 										NEXTCFG CONFIG_HA_DEVICE_CLASS_LIGHT 
 										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR IoT Light") 
 										NEXTCFG CONFIG_HA_ID_ADDCID("_light") // %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_ICON_MDI("sun-wireless-outline")
+										NEXTCFG CONFIG_HA_EXPIRE_AFTER("30")
 										NEXTCFG CONFIG_HA_STATE() 
 										NEXTCFG CONFIG_HA_UNIT_LIGHT 
 										NEXTCFG CONFIG_HA_JSON_VALUE("light")
