@@ -76,7 +76,7 @@
 #define CONFIG_HA_DEVICE_SW_VERSION(version)			"\"sw\":\""version"\""
 
 // Is it enough to send this with one of the config topics? or a completely separate one?
-#define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"light_%s\"]") \
+#define CONFIG_HA_THIS_DEVICE							CONFIG_HA_DEVICE( CONFIG_HA_DEVICE_IDENTIFIERS("[\"neopixel_%s\"]") \
 														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT") \
 														NEXTCFG CONFIG_HA_DEVICE_MANUFACTURER("Microchip Technology") \
 														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR-IoT Neopixel Light") \
@@ -85,9 +85,10 @@
 static char mqttSubscribeTopic[NUM_TOPICS_SUBSCRIBE][SUBSCRIBE_TOPIC_SIZE];
 static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
 static char json[PAYLOAD_SIZE];
-static uint8_t discover = 1;
+static uint8_t discover = 10;
 
 typedef struct lights_struct {
+	uint8_t changed;
 	uint8_t on;
 	uint8_t brightness;
 	uint8_t red;
@@ -98,10 +99,11 @@ typedef struct lights_struct {
 } lights_t;
 
 static lights_t lights = {
+	.changed = true,
 	.on = 1,
-	.brightness = 255,
-	.red = 255,
-	.green = 255,
+	.brightness = 252,
+	.red = 253,
+	.green = 254,
 	.blue =	255,
 	.hue = 360,
 	.saturation = 100
@@ -116,7 +118,7 @@ int main(void)
 		runScheduler();  
 		if (!shared_networking_params.haveAPConnection)
 		{
-			discover = 1;
+			discover = 10;
 		}
 	}
    
@@ -134,18 +136,19 @@ void sendToCloud(void)
 		if (discover)
 		{
 			discover--;
-			debug_printIoTAppMsg("Application: Sending Discover Config %");
 			#ifdef DEBUG
 				flags.retain = 0;
 			#else
 				flags.retain = 1;
 			#endif
 
-			if (discover == 0) {
+			if (discover == 5) {
+				debug_printIoTAppMsg("Application: Sending Discover Config %");
+
 				sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_CONFIG_ADDCID("_light"), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 				len = sprintf(json, CONFIG_HA(CONFIG_HA_PREFIX_ADDCID("light") // %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT Neopixel Light") 
-										NEXTCFG CONFIG_HA_ID_ADDCID("light_") // 2x %s = eeprom->mqttCID
+										NEXTCFG CONFIG_HA_ID_ADDCID("neopixel_") // 2x %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_STATE() 
 										NEXTCFG CONFIG_HA_COMMAND()
 										NEXTCFG CONFIG_HA_LIGHT_TEMPLATES
@@ -156,7 +159,9 @@ void sendToCloud(void)
 									eeprom->mqttCID);
 			}
 
-		}  else {
+		}  else if (lights.changed) {
+			lights.changed = false;
+			
 			debug_printIoTAppMsg("Application: Sending State");
 
 			sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_STATE_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
@@ -202,6 +207,21 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 
 	debug_printIoTAppMsg("topic: %s", topic);
 	debug_printIoTAppMsg("payload: %s", payload);
+	
+	if (payload[1] == 'f')
+	{
+		if (lights.on)
+		{
+			lights.changed = true;
+		}
+		lights.on = false;
+	} else {
+		if (!lights.on)
+		{
+			lights.changed = true;
+		}
+		lights.on = true;
+	}
 	
 	ledParameterRed.onTime = LED_BLIP;
 	ledParameterRed.offTime = LED_BLIP;
