@@ -87,22 +87,22 @@ static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
 static char json[PAYLOAD_SIZE];
 static uint8_t discover = 10;
 
-typedef struct lights_struct {
+typedef struct control_struct {
 	uint8_t changed;
 	uint8_t on;
 	uint8_t brightness;
 	uint8_t red;
 	uint8_t green;
 	uint8_t blue;
-} lights_t;
+} control_t;
 
-static lights_t lights = {
+static control_t control = {
 	.changed = true,
-	.on = 1,
-	.brightness = 252,
-	.red = 253,
-	.green = 254,
-	.blue =	255
+	.on = false,
+	.brightness = 10,
+	.red = 200,
+	.green = 0,
+	.blue =	55
 };
 
 int main(void)
@@ -155,20 +155,20 @@ void sendToCloud(void)
 									eeprom->mqttCID);
 			}
 
-		}  else if (lights.changed) {
-			lights.changed = false;
+		}  else if (control.changed) {
+			control.changed = false;
 			
 			debug_printIoTAppMsg("Application: Sending State");
 
 			sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_STATE_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
 //			len = sprintf(json,"on,255,255-255-255");
-			if (lights.on)
+			if (control.on)
 			{
 				len = sprintf(json,"on,%u,%u-%u-%u",
-									 lights.brightness, 
-									 lights.red, 
-									 lights.green, 
-									 lights.blue);
+									 control.brightness, 
+									 control.red, 
+									 control.green, 
+									 control.blue);
 			} else {
 				len = sprintf(json, "off");
 			}
@@ -201,21 +201,32 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 
 	debug_printIoTAppMsg("topic: %s", topic);
 	debug_printIoTAppMsg("payload: %s", payload);
+
 	
-	if (payload[1] == 'f')
+	if (payload[1] == 'f') // off
 	{
-		if (lights.on)
-		{
-			lights.changed = true;
+		control.on = false;
+	} 
+	else // on with brightness or RGB (not both at the same time)
+	{ 	
+		char * next_string;
+
+		//strtok does not handle two delimiters in a row, so checking for "on,," and for "on,,--"
+		if(payload[3] != ',') {
+			next_string = strtok((char *)&payload[3], ",");		
+			control.brightness = atoi(next_string);
+		} else if(payload[4] != '-') {
+			next_string = strtok((char *)&payload[4], "-");
+			control.red = atoi(next_string);
+			next_string = strtok(NULL, "-");
+			control.green = atoi(next_string);
+			next_string = strtok(NULL, "-");
+			control.blue = atoi(next_string);
 		}
-		lights.on = false;
-	} else {
-		if (!lights.on)
-		{
-			lights.changed = true;
-		}
-		lights.on = true;
+
+		control.on = true;
 	}
+	control.changed = true;
 	
 	ledParameterRed.onTime = LED_BLIP;
 	ledParameterRed.offTime = LED_BLIP;
