@@ -1,0 +1,3 @@
+[submodule "AVRIoT.X/libavr_neopixel_uart"]
+	path = AVRIoT.X/libavr_neopixel_uart
+	url = git@gitlab.com:printedcircuitbirds/libavr_neopixel_uart.git

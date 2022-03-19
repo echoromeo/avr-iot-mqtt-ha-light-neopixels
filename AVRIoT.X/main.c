@@ -26,6 +26,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "main.h"
+#include "libavr_neopixel_uart/neopixel.h"
 
 #include "mcc_generated_files/config/IoT_Sensor_Node_config.h"
 #include "mcc_generated_files/config/conf_winc.h"
@@ -97,20 +98,32 @@ typedef struct control_struct {
 } control_t;
 
 static control_t control = {
-	.changed = true,
-	.on = false,
+	.changed = 3,
+	.on = true,
 	.brightness = 10,
 	.red = 200,
 	.green = 0,
 	.blue =	55
 };
 
+static color_t lights = {{0}};
+static uint16_t num_leds = 25; // TODO: CLI or through HA? or both?
+void update_led_config(void);
+
 int main(void)
 {
 	application_init();
+	neopixel_init();
 
 	while (1)
-	{ 
+	{
+		if (control.changed & 1)
+		{
+			control.changed &= ~1;
+			update_led_config();
+			neopixel_configure_constant(lights, num_leds);
+		}
+		 
 		runScheduler();  
 		if (!shared_networking_params.haveAPConnection)
 		{
@@ -155,8 +168,8 @@ void sendToCloud(void)
 									eeprom->mqttCID);
 			}
 
-		}  else if (control.changed) {
-			control.changed = false;
+		}  else if (control.changed == 2) { //Update neopixels before sending update
+			control.changed = 0;
 			
 			debug_printIoTAppMsg("Application: Sending State");
 
@@ -226,9 +239,22 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 
 		control.on = true;
 	}
-	control.changed = true;
+	control.changed = 3;
 	
 	ledParameterRed.onTime = LED_BLIP;
 	ledParameterRed.offTime = LED_BLIP;
 	LED_control(&ledParameterRed);
+}
+
+void update_led_config(void) {
+
+	if (control.on)
+	{
+		lights.r = ((uint16_t) control.red * (uint16_t)control.brightness)/255ul;
+		lights.g = ((uint16_t) control.green * (uint16_t)control.brightness)/255ul;
+		lights.b = ((uint16_t) control.blue * (uint16_t)control.brightness)/255ul;
+	}
+	else {
+		lights.channel = 0;
+	}
 }

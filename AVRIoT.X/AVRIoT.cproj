@@ -282,106 +282,108 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <com.microchip.xc8>
-        <com.microchip.xc8.common.optimization.RelaxBranches>True</com.microchip.xc8.common.optimization.RelaxBranches>
-        <com.microchip.xc8.common.outputfiles.hex>True</com.microchip.xc8.common.outputfiles.hex>
-        <com.microchip.xc8.common.outputfiles.eep>True</com.microchip.xc8.common.outputfiles.eep>
-        <com.microchip.xc8.common.outputfiles.usersignatures>False</com.microchip.xc8.common.outputfiles.usersignatures>
-        <com.microchip.xc8.common.outputfiles.lss>True</com.microchip.xc8.common.outputfiles.lss>
-        <com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>
-        <com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>
-        <com.microchip.xc8.compiler.symbols.DefSymbols>
-          <ListValues>
-            <Value>(%24DeviceMacro)</Value>
-          </ListValues>
-        </com.microchip.xc8.compiler.symbols.DefSymbols>
-        <com.microchip.xc8.compiler.directories.IncludePaths>
-          <ListValues>
-            <Value>../Config</Value>
-            <Value>../mcc_generated_files</Value>
-            <Value>../mcc_generated_files/cli</Value>
-            <Value>../mcc_generated_files/cloud</Value>
-            <Value>../mcc_generated_files/config</Value>
-            <Value>../mcc_generated_files/credentials_storage</Value>
-            <Value>../mcc_generated_files/CryptoAuthenticationLibrary</Value>
-            <Value>../mcc_generated_files/drivers</Value>
-            <Value>../mcc_generated_files/include</Value>
-            <Value>../mcc_generated_files/mqtt</Value>
-            <Value>../mcc_generated_files/src</Value>
-            <Value>../mcc_generated_files/utils</Value>
-            <Value>../mcc_generated_files/winc</Value>
-            <Value>%24(PackRepoDir)\Atmel\ATmega_DFP\1.7.374\xc8\avr\include\</Value>
-          </ListValues>
-        </com.microchip.xc8.compiler.directories.IncludePaths>
-        <com.microchip.xc8.compiler.optimization.level>Optimize for size (-Os)</com.microchip.xc8.compiler.optimization.level>
-        <com.microchip.xc8.compiler.optimization.PackStructureMembers>True</com.microchip.xc8.compiler.optimization.PackStructureMembers>
-        <com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>True</com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>
-        <com.microchip.xc8.compiler.warnings.AllWarnings>True</com.microchip.xc8.compiler.warnings.AllWarnings>
-        <com.microchip.xc8.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wno-pragmas</com.microchip.xc8.compiler.miscellaneous.OtherFlags>
-        <com.microchip.xc8.linker.libraries.Libraries>
-          <ListValues>
-            <Value>libm</Value>
-          </ListValues>
-        </com.microchip.xc8.linker.libraries.Libraries>
-        <com.microchip.xc8.assembler.general.IncludePaths>
-          <ListValues>
-            <Value>../Config</Value>
-            <Value>../mcc_generated_files</Value>
-          </ListValues>
-        </com.microchip.xc8.assembler.general.IncludePaths>
-      </com.microchip.xc8>
+  <com.microchip.xc8.common.optimization.RelaxBranches>True</com.microchip.xc8.common.optimization.RelaxBranches>
+  <com.microchip.xc8.common.outputfiles.hex>True</com.microchip.xc8.common.outputfiles.hex>
+  <com.microchip.xc8.common.outputfiles.eep>True</com.microchip.xc8.common.outputfiles.eep>
+  <com.microchip.xc8.common.outputfiles.usersignatures>False</com.microchip.xc8.common.outputfiles.usersignatures>
+  <com.microchip.xc8.common.outputfiles.lss>True</com.microchip.xc8.common.outputfiles.lss>
+  <com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <com.microchip.xc8.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>(%24DeviceMacro)</Value>
+      <Value>F_CPU=10000000</Value>
+    </ListValues>
+  </com.microchip.xc8.compiler.symbols.DefSymbols>
+  <com.microchip.xc8.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../Config</Value>
+      <Value>../mcc_generated_files</Value>
+      <Value>../mcc_generated_files/cli</Value>
+      <Value>../mcc_generated_files/cloud</Value>
+      <Value>../mcc_generated_files/config</Value>
+      <Value>../mcc_generated_files/credentials_storage</Value>
+      <Value>../mcc_generated_files/CryptoAuthenticationLibrary</Value>
+      <Value>../mcc_generated_files/drivers</Value>
+      <Value>../mcc_generated_files/include</Value>
+      <Value>../mcc_generated_files/mqtt</Value>
+      <Value>../mcc_generated_files/src</Value>
+      <Value>../mcc_generated_files/utils</Value>
+      <Value>../mcc_generated_files/winc</Value>
+      <Value>%24(PackRepoDir)\Atmel\ATmega_DFP\1.7.374\xc8\avr\include\</Value>
+    </ListValues>
+  </com.microchip.xc8.compiler.directories.IncludePaths>
+  <com.microchip.xc8.compiler.optimization.level>Optimize for size (-Os)</com.microchip.xc8.compiler.optimization.level>
+  <com.microchip.xc8.compiler.optimization.PackStructureMembers>True</com.microchip.xc8.compiler.optimization.PackStructureMembers>
+  <com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>True</com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>
+  <com.microchip.xc8.compiler.warnings.AllWarnings>True</com.microchip.xc8.compiler.warnings.AllWarnings>
+  <com.microchip.xc8.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wno-pragmas</com.microchip.xc8.compiler.miscellaneous.OtherFlags>
+  <com.microchip.xc8.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </com.microchip.xc8.linker.libraries.Libraries>
+  <com.microchip.xc8.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>../Config</Value>
+      <Value>../mcc_generated_files</Value>
+    </ListValues>
+  </com.microchip.xc8.assembler.general.IncludePaths>
+</com.microchip.xc8>
     </ToolchainSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <com.microchip.xc8>
-        <com.microchip.xc8.common.outputfiles.hex>True</com.microchip.xc8.common.outputfiles.hex>
-        <com.microchip.xc8.common.outputfiles.eep>True</com.microchip.xc8.common.outputfiles.eep>
-        <com.microchip.xc8.common.outputfiles.usersignatures>False</com.microchip.xc8.common.outputfiles.usersignatures>
-        <com.microchip.xc8.common.outputfiles.lss>True</com.microchip.xc8.common.outputfiles.lss>
-        <com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>
-        <com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>
-        <com.microchip.xc8.compiler.symbols.DefSymbols>
-          <ListValues>
-            <Value>(%24DeviceMacro)</Value>
-            <Value>DEBUG</Value>
-          </ListValues>
-        </com.microchip.xc8.compiler.symbols.DefSymbols>
-        <com.microchip.xc8.compiler.directories.IncludePaths>
-          <ListValues>
-            <Value>../Config</Value>
-            <Value>../mcc_generated_files</Value>
-            <Value>../mcc_generated_files/cli</Value>
-            <Value>../mcc_generated_files/cloud</Value>
-            <Value>../mcc_generated_files/config</Value>
-            <Value>../mcc_generated_files/credentials_storage</Value>
-            <Value>../mcc_generated_files/CryptoAuthenticationLibrary</Value>
-            <Value>../mcc_generated_files/drivers</Value>
-            <Value>../mcc_generated_files/include</Value>
-            <Value>../mcc_generated_files/mqtt</Value>
-            <Value>../mcc_generated_files/src</Value>
-            <Value>../mcc_generated_files/utils</Value>
-            <Value>../mcc_generated_files/winc</Value>
-            <Value>%24(PackRepoDir)\Atmel\ATmega_DFP\1.7.374\xc8\avr\include\</Value>
-          </ListValues>
-        </com.microchip.xc8.compiler.directories.IncludePaths>
-        <com.microchip.xc8.compiler.optimization.level>Optimize (-O1)</com.microchip.xc8.compiler.optimization.level>
-        <com.microchip.xc8.compiler.optimization.PackStructureMembers>True</com.microchip.xc8.compiler.optimization.PackStructureMembers>
-        <com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>True</com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>
-        <com.microchip.xc8.compiler.optimization.DebugLevel>Default (-g2)</com.microchip.xc8.compiler.optimization.DebugLevel>
-        <com.microchip.xc8.compiler.warnings.AllWarnings>True</com.microchip.xc8.compiler.warnings.AllWarnings>
-        <com.microchip.xc8.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wno-pragmas</com.microchip.xc8.compiler.miscellaneous.OtherFlags>
-        <com.microchip.xc8.linker.libraries.Libraries>
-          <ListValues>
-            <Value>libm</Value>
-          </ListValues>
-        </com.microchip.xc8.linker.libraries.Libraries>
-        <com.microchip.xc8.assembler.general.IncludePaths>
-          <ListValues>
-            <Value>../Config</Value>
-          </ListValues>
-        </com.microchip.xc8.assembler.general.IncludePaths>
-        <com.microchip.xc8.assembler.debugging.DebugLevel>Default (-Wa,-g)</com.microchip.xc8.assembler.debugging.DebugLevel>
-      </com.microchip.xc8>
+  <com.microchip.xc8.common.outputfiles.hex>True</com.microchip.xc8.common.outputfiles.hex>
+  <com.microchip.xc8.common.outputfiles.eep>True</com.microchip.xc8.common.outputfiles.eep>
+  <com.microchip.xc8.common.outputfiles.usersignatures>False</com.microchip.xc8.common.outputfiles.usersignatures>
+  <com.microchip.xc8.common.outputfiles.lss>True</com.microchip.xc8.common.outputfiles.lss>
+  <com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>True</com.microchip.xc8.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <com.microchip.xc8.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>(%24DeviceMacro)</Value>
+      <Value>DEBUG</Value>
+      <Value>F_CPU=10000000</Value>
+    </ListValues>
+  </com.microchip.xc8.compiler.symbols.DefSymbols>
+  <com.microchip.xc8.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../Config</Value>
+      <Value>../mcc_generated_files</Value>
+      <Value>../mcc_generated_files/cli</Value>
+      <Value>../mcc_generated_files/cloud</Value>
+      <Value>../mcc_generated_files/config</Value>
+      <Value>../mcc_generated_files/credentials_storage</Value>
+      <Value>../mcc_generated_files/CryptoAuthenticationLibrary</Value>
+      <Value>../mcc_generated_files/drivers</Value>
+      <Value>../mcc_generated_files/include</Value>
+      <Value>../mcc_generated_files/mqtt</Value>
+      <Value>../mcc_generated_files/src</Value>
+      <Value>../mcc_generated_files/utils</Value>
+      <Value>../mcc_generated_files/winc</Value>
+      <Value>%24(PackRepoDir)\Atmel\ATmega_DFP\1.7.374\xc8\avr\include\</Value>
+    </ListValues>
+  </com.microchip.xc8.compiler.directories.IncludePaths>
+  <com.microchip.xc8.compiler.optimization.level>Optimize (-O1)</com.microchip.xc8.compiler.optimization.level>
+  <com.microchip.xc8.compiler.optimization.PackStructureMembers>True</com.microchip.xc8.compiler.optimization.PackStructureMembers>
+  <com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>True</com.microchip.xc8.compiler.optimization.AllocateBytesNeededForEnum>
+  <com.microchip.xc8.compiler.optimization.DebugLevel>Default (-g2)</com.microchip.xc8.compiler.optimization.DebugLevel>
+  <com.microchip.xc8.compiler.warnings.AllWarnings>True</com.microchip.xc8.compiler.warnings.AllWarnings>
+  <com.microchip.xc8.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wno-pragmas</com.microchip.xc8.compiler.miscellaneous.OtherFlags>
+  <com.microchip.xc8.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </com.microchip.xc8.linker.libraries.Libraries>
+  <com.microchip.xc8.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>../Config</Value>
+    </ListValues>
+  </com.microchip.xc8.assembler.general.IncludePaths>
+  <com.microchip.xc8.assembler.debugging.DebugLevel>Default (-Wa,-g)</com.microchip.xc8.assembler.debugging.DebugLevel>
+</com.microchip.xc8>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
@@ -418,9 +420,22 @@
     <Folder Include="mcc_generated_files\winc\m2m\" />
     <Folder Include="mcc_generated_files\winc\socket\" />
     <Folder Include="mcc_generated_files\winc\spi_flash\" />
+    <Folder Include="libavr_neopixel_uart" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\RTE_Components.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libavr_neopixel_uart\neopixel.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libavr_neopixel_uart\neopixel.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libavr_neopixel_uart\neopixel_uart.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="libavr_neopixel_uart\neopixel_uart.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
@@ -1030,6 +1045,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="mcc_generated_files\winc\spi_flash\spi_flash_map.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="neopixel_config.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
