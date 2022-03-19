@@ -57,9 +57,9 @@
 #define CONFIG_HA_ICON_MDI(name)						"\"icon\":\"mdi:" name "\""
 #define NEXTCFG 										","
 
-// simple string payload with the format state,brightness,r-g-b,h-s (e.g., on,255,255-255-255,360-100),
+// simple string payload with the format state,brightness,r-g-b (e.g., on,255,255-255-255),
 #define CONFIG_HA_LIGHT_TEMPLATES						"\"schema\":\"template\"" \
-														NEXTCFG "\"cmd_on_tpl\":\"on,{{ brightness|d }},{{ red|d }}-{{ green|d }}-{{ blue|d }},{{ hue|d }}-{{ sat|d }}\"" \
+														NEXTCFG "\"cmd_on_tpl\":\"on,{{ brightness|d }},{{ red|d }}-{{ green|d }}-{{ blue|d }}\"" \
 														NEXTCFG "\"cmd_off_tpl\":\"off\"" \
 														NEXTCFG "\"stat_tpl\":\"{{ value.split(',')[0] }}\"" \
 														NEXTCFG "\"bri_tpl\":\"{{ value.split(',')[1] }}\"" \
@@ -94,8 +94,6 @@ typedef struct lights_struct {
 	uint8_t red;
 	uint8_t green;
 	uint8_t blue;
-	uint16_t hue;
-	uint8_t saturation;
 } lights_t;
 
 static lights_t lights = {
@@ -104,9 +102,7 @@ static lights_t lights = {
 	.brightness = 252,
 	.red = 253,
 	.green = 254,
-	.blue =	255,
-	.hue = 360,
-	.saturation = 100
+	.blue =	255
 };
 
 int main(void)
@@ -165,16 +161,14 @@ void sendToCloud(void)
 			debug_printIoTAppMsg("Application: Sending State");
 
 			sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_STATE_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-//			len = sprintf(json,"on,255,255-255-255,360-100");
+//			len = sprintf(json,"on,255,255-255-255");
 			if (lights.on)
 			{
-				len = sprintf(json,"on,%u,%u-%u-%u,%u-%u",
+				len = sprintf(json,"on,%u,%u-%u-%u",
 									 lights.brightness, 
 									 lights.red, 
 									 lights.green, 
-									 lights.blue, 
-									 lights.hue, 
-									 lights.saturation);
+									 lights.blue);
 			} else {
 				len = sprintf(json, "off");
 			}
