@@ -54,7 +54,8 @@ typedef struct eeprom_data
 	char mqttAddress[MAX_MQTT_CREDENTIALS_LENGTH];
 	uint16_t mqttPort;
 	uint8_t mqttAddressType;
-	uint8_t reserved[(MAX_MQTT_CREDENTIALS_LENGTH*2)-3]; // Future eeprom page alignment
+	uint16_t num_leds;
+	uint8_t reserved[(MAX_MQTT_CREDENTIALS_LENGTH*2)-5]; // Future eeprom page alignment
 } eeprom_data_t;
 
 extern wifi_credentials_t wifi;
@@ -69,6 +70,7 @@ void CREDENTIALS_STORAGE_writeMQTTCredentials(char *username, char *password,cha
 void CREDENTIALS_STORAGE_clearMQTTCredentials(void);
 void CREDENTIALS_STORAGE_writeMQTTBroker(char *address, uint16_t port, uint8_t type);
 void CREDENTIALS_STORAGE_clearMQTTBroker(void);
+void CREDENTIALS_STORAGE_writeNumLEDs(uint16_t number);
 void CREDENTIALS_STORAGE_readNTPServerName(char *serverNameBuffer);
 void CREDENTIALS_STORAGE_writeNTPServerName(char *serverNameBuffer);
 

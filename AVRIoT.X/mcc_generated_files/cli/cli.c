@@ -66,6 +66,7 @@
                         "wifi <ssid>[,<pass>,[authType]]" NEWLINE\
                         "mqtt [<user>],[<pass>],[cid]" NEWLINE\
                         "broker <address>,<port>,<addresstype>" NEWLINE\
+						"leds number" NEWLINE\
                         "debug" NEWLINE\
                         "--------------------------------------------"NEWLINE"\4"
 
@@ -89,6 +90,7 @@ static void get_device_id(char *pArg);
 static void get_cli_version(char *pArg);
 static void get_firmware_version(char *pArg);
 static void set_debug_level(char *pArg);
+static void set_num_leds(char *pArg);
 static bool endOfLineTest(char c);
 static void enableUsartRxInterrupts(void);
 
@@ -109,6 +111,7 @@ const struct cmd commands[] =
     { "wifi",        set_wifi_auth },
     { "mqtt",        set_mqtt_auth},
     { "broker",      set_mqtt_broker},
+    { "leds",		 set_num_leds},
     { "thing",       get_thing_name },
     { "device",      get_device_id },
     { "cli_version", get_cli_version },
@@ -328,6 +331,15 @@ static void set_mqtt_broker(char *addr_port_type)
 	} else {
 		printf("Error. Host command format is host <address>,port,address_type\r\n\4");
 	}
+}
+
+static void set_num_leds(char *pArg)
+{
+	if (pArg[0] != '\0')
+	{
+		CREDENTIALS_STORAGE_writeNumLEDs(atoi(pArg));
+	}
+	printf("OK %u\r\n\4", eeprom->num_leds);
 }
 
 

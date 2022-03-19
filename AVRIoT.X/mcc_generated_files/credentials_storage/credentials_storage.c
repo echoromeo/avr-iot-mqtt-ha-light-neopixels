@@ -166,5 +166,8 @@ void CREDENTIALS_STORAGE_clearMQTTBroker(void) {
 	eeprom_userrow_write_buffer(false);
 }
 
-
+void CREDENTIALS_STORAGE_writeNumLEDs(uint16_t number) {
+	eeprom->num_leds = number;
+	eeprom_userrow_write_buffer(false);
+}
 

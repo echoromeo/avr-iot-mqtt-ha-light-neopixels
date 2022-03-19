@@ -99,15 +99,14 @@ typedef struct control_struct {
 
 static control_t control = {
 	.changed = 3,
-	.on = true,
-	.brightness = 10,
+	.on = false,
+	.brightness = 50,
 	.red = 200,
 	.green = 0,
 	.blue =	55
 };
 
 static color_t lights = {{0}};
-static uint16_t num_leds = 25; // TODO: CLI or through HA? or both?
 void update_led_config(void);
 
 int main(void)
@@ -121,7 +120,7 @@ int main(void)
 		{
 			control.changed &= ~1;
 			update_led_config();
-			neopixel_configure_constant(lights, num_leds);
+			neopixel_configure_constant(lights, eeprom->num_leds);
 		}
 		 
 		runScheduler();  
@@ -254,7 +253,8 @@ void update_led_config(void) {
 		lights.g = ((uint16_t) control.green * (uint16_t)control.brightness)/255ul;
 		lights.b = ((uint16_t) control.blue * (uint16_t)control.brightness)/255ul;
 	}
-	else {
+	else 
+	{
 		lights.channel = 0;
 	}
 }
