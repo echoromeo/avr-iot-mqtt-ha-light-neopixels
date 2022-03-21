@@ -49,12 +49,14 @@
 #define TOPIC_HA_LIGHT_STATE_ADDCID(extra_id)			HA_TOPIC_ADDCID("light") extra_id "/state"
 #define TOPIC_HA_LIGHT_COMMAND_ADDCID(extra_id)			HA_TOPIC_ADDCID("light") extra_id "/set"
 #define TOPIC_HA_LIGHT_CONFIG_ADDCID(extra_id)			HA_TOPIC_ADDCID("light") extra_id "/config"
+#define TOPIC_HA_LIGHT_ATTRIBUTES_ADDCID(extra_id)		HA_TOPIC_ADDCID("light") extra_id "/attr"
 
 #define CONFIG_HA(content)								"{" content "}"
 #define CONFIG_HA_PREFIX_ADDCID(type)					"\"~\": \"" HA_TOPIC_ADDCID(type) "\""
 #define CONFIG_HA_ID_ADDCID(name)						"\"uniq_id\":\"" name "%s\",\"obj_id\":\"" name "%s\""
 #define CONFIG_HA_STATE(extra_id)						"\"stat_t\":\"~" extra_id "/state\""
 #define CONFIG_HA_COMMAND(extra_id)						"\"cmd_t\":\"~" extra_id "/set\""
+#define CONFIG_HA_ATTRIBUTES(extra_id)					"\"json_attr_t\":\"~" extra_id "/attr\""
 #define CONFIG_HA_ICON_MDI(name)						"\"icon\":\"mdi:" name "\""
 #define NEXTCFG 										","
 
@@ -68,7 +70,6 @@
 														NEXTCFG "\"g_tpl\":\"{{ value.split(',')[2].split('-')[1] }}\"" \
 														NEXTCFG "\"b_tpl\":\"{{ value.split(',')[2].split('-')[2] }}\""
 
-
 #define CONFIG_HA_DEVICE(content)						"\"dev\":{"content"}"
 #define CONFIG_HA_DEVICE_IDENTIFIERS(content)			"\"ids\":"content
 #define CONFIG_HA_DEVICE_NAME(name)						"\"name\":\""name"\""
@@ -81,7 +82,7 @@
 														NEXTCFG CONFIG_HA_DEVICE_NAME("AVR-IoT") \
 														NEXTCFG CONFIG_HA_DEVICE_MANUFACTURER("Microchip Technology") \
 														NEXTCFG CONFIG_HA_DEVICE_MODEL("AVR-IoT Neopixel Light") \
-														NEXTCFG CONFIG_HA_DEVICE_SW_VERSION("7.0.0"))
+														NEXTCFG CONFIG_HA_DEVICE_SW_VERSION("7.1.0"))
 
 static char mqttSubscribeTopic[NUM_TOPICS_SUBSCRIBE][SUBSCRIBE_TOPIC_SIZE];
 static char mqttPublishTopic[PUBLISH_TOPIC_SIZE];
@@ -100,13 +101,15 @@ typedef struct control_struct {
 static control_t control = {
 	.changed = 3,
 	.on = false,
-	.brightness = 50,
+	.brightness = 20,
 	.red = 200,
 	.green = 0,
 	.blue =	55
 };
 
 static color_t lights = {{0}};
+static uint16_t prev_num_leds = 0;
+
 void update_led_config(void);
 
 int main(void)
@@ -159,6 +162,7 @@ void sendToCloud(void)
 										NEXTCFG CONFIG_HA_ID_ADDCID("neopixel_") // 2x %s = eeprom->mqttCID
 										NEXTCFG CONFIG_HA_STATE() 
 										NEXTCFG CONFIG_HA_COMMAND()
+										NEXTCFG CONFIG_HA_ATTRIBUTES()
 										NEXTCFG CONFIG_HA_LIGHT_TEMPLATES
 										NEXTCFG CONFIG_HA_THIS_DEVICE), // %s = eeprom->mqttCID
 									eeprom->mqttCID,
@@ -184,6 +188,11 @@ void sendToCloud(void)
 			} else {
 				len = sprintf(json, "off");
 			}
+		} else if (eeprom->num_leds != prev_num_leds) { // Update attributes (Number of NeoPixels)
+			sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_ATTRIBUTES_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
+			len = sprintf(json,"{\"NeoPixels\":%d}", eeprom->num_leds);
+			prev_num_leds = eeprom->num_leds;
+			control.changed |= 1;
 		}
 
 		if (len) {
