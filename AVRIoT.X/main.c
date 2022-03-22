@@ -25,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
+#include <math.h>
 #include "main.h"
 #include "libavr_neopixel_uart/neopixel.h"
 
@@ -60,9 +61,9 @@
 #define CONFIG_HA_ICON_MDI(name)						"\"icon\":\"mdi:" name "\""
 #define NEXTCFG 										","
 
-// simple string payload with the format state,brightness,r-g-b (e.g., on,255,255-255-255),
+// simple string payload with the format state,brightness,r-g-b,h-s (e.g., on,255,255-255-255,360-100),
 #define CONFIG_HA_LIGHT_TEMPLATES						"\"schema\":\"template\"" \
-														NEXTCFG "\"cmd_on_tpl\":\"on,{{ brightness|d }},{{ red|d }}-{{ green|d }}-{{ blue|d }}\"" \
+														NEXTCFG "\"cmd_on_tpl\":\"on,{{ brightness|d }},{{ red|d }}-{{ green|d }}-{{ blue|d }},{{ hue|d }}-{{ sat|d }}\"" \
 														NEXTCFG "\"cmd_off_tpl\":\"off\"" \
 														NEXTCFG "\"stat_tpl\":\"{{ value.split(',')[0] }}\"" \
 														NEXTCFG "\"bri_tpl\":\"{{ value.split(',')[1] }}\"" \
@@ -93,24 +94,45 @@ typedef struct control_struct {
 	uint8_t changed;
 	uint8_t on;
 	uint8_t brightness;
-	uint8_t red;
-	uint8_t green;
-	uint8_t blue;
+	color_t rgb;
+	float hue;
+	float saturation;
+
 } control_t;
 
-static control_t control = {
+static volatile control_t control = {
 	.changed = 3,
 	.on = false,
 	.brightness = 20,
-	.red = 200,
-	.green = 0,
-	.blue =	55
+	.hue = 360,
+	.saturation = 100
 };
 
-static color_t lights = {{0}};
-static uint16_t prev_num_leds = 0;
+static volatile color_t lights = {{0}};
+static volatile uint16_t prev_num_leds = 0;
+
+static const uint8_t NeoPixelGammaTable_Adafruit[256] = {
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+	0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
+	1,   1,   1,   1,   1,   1,   2,   2,   2,   2,   2,   2,   2,   2,   3,
+	3,   3,   3,   3,   3,   4,   4,   4,   4,   5,   5,   5,   5,   5,   6,
+	6,   6,   6,   7,   7,   7,   8,   8,   8,   9,   9,   9,   10,  10,  10,
+	11,  11,  11,  12,  12,  13,  13,  13,  14,  14,  15,  15,  16,  16,  17,
+	17,  18,  18,  19,  19,  20,  20,  21,  21,  22,  22,  23,  24,  24,  25,
+	25,  26,  27,  27,  28,  29,  29,  30,  31,  31,  32,  33,  34,  34,  35,
+	36,  37,  38,  38,  39,  40,  41,  42,  42,  43,  44,  45,  46,  47,  48,
+	49,  50,  51,  52,  53,  54,  55,  56,  57,  58,  59,  60,  61,  62,  63,
+	64,  65,  66,  68,  69,  70,  71,  72,  73,  75,  76,  77,  78,  80,  81,
+	82,  84,  85,  86,  88,  89,  90,  92,  93,  94,  96,  97,  99,  100, 102,
+	103, 105, 106, 108, 109, 111, 112, 114, 115, 117, 119, 120, 122, 124, 125,
+	127, 129, 130, 132, 134, 136, 137, 139, 141, 143, 145, 146, 148, 150, 152,
+	154, 156, 158, 160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182,
+	184, 186, 188, 191, 193, 195, 197, 199, 202, 204, 206, 209, 211, 213, 215,
+	218, 220, 223, 225, 227, 230, 232, 235, 237, 240, 242, 245, 247, 250, 252,
+255};
 
 void update_led_config(void);
+uint24_t NeoPixel_HSV_Adafruit_Float(float ha_hue, float ha_sat, uint8_t val);
 
 int main(void)
 {
@@ -177,14 +199,13 @@ void sendToCloud(void)
 			debug_printIoTAppMsg("Application: Sending State");
 
 			sprintf(mqttPublishTopic, TOPIC_HA_LIGHT_STATE_ADDCID(), eeprom->mqttCID); // Can optimize this a lot if never changing CID
-//			len = sprintf(json,"on,255,255-255-255");
 			if (control.on)
 			{
-				len = sprintf(json,"on,%u,%u-%u-%u",
+				len = sprintf(json,"on,%u,%u-%u-%u,-", // Looks like I do not need to send back the floats
 									 control.brightness, 
-									 control.red, 
-									 control.green, 
-									 control.blue);
+									 control.rgb.r, 
+									 control.rgb.g, 
+									 control.rgb.b);
 			} else {
 				len = sprintf(json, "off");
 			}
@@ -232,17 +253,21 @@ void receivedFromCloud(uint8_t *topic, uint8_t *payload)
 	{ 	
 		char * next_string;
 
-		//strtok does not handle two delimiters in a row, so checking for "on,," and for "on,,--"
+		//strtok does not handle two delimiters in a row, so checking for "on,," and for "on,,--,-"
 		if(payload[3] != ',') {
 			next_string = strtok((char *)&payload[3], ",");		
 			control.brightness = atoi(next_string);
 		} else if(payload[4] != '-') {
 			next_string = strtok((char *)&payload[4], "-");
-			control.red = atoi(next_string);
+			control.rgb.r = atoi(next_string);
 			next_string = strtok(NULL, "-");
-			control.green = atoi(next_string);
+			control.rgb.g = atoi(next_string);
+			next_string = strtok(NULL, ",");
+			control.rgb.b = atoi(next_string);
 			next_string = strtok(NULL, "-");
-			control.blue = atoi(next_string);
+			control.hue = atof(next_string);
+			next_string = strtok(NULL, "-");
+			control.saturation = atof(next_string);
 		}
 
 		control.on = true;
@@ -258,12 +283,100 @@ void update_led_config(void) {
 
 	if (control.on)
 	{
-		lights.r = ((uint16_t) control.red * (uint16_t)control.brightness)/255ul;
-		lights.g = ((uint16_t) control.green * (uint16_t)control.brightness)/255ul;
-		lights.b = ((uint16_t) control.blue * (uint16_t)control.brightness)/255ul;
+		control.rgb.channel = NeoPixel_HSV_Adafruit_Float(control.hue,control.saturation,255);
+		lights.channel = NeoPixel_HSV_Adafruit_Float(control.hue,control.saturation,control.brightness);
+		for (uint8_t i = 0; i < NEOPIXEL_LED_BYTES; i++)
+		{
+			lights.array[i] = NeoPixelGammaTable_Adafruit[lights.array[i]];
+		}
 	}
 	else 
 	{
 		lights.channel = 0;
 	}
+}
+
+/*
+ * Ported the Adafruit HSV to 0-360 degrees, 0-100 saturation floats. brightness is still 0-255.
+ * Original can be found here:
+ * https://github.com/adafruit/Adafruit_NeoPixel/blob/2a33fdf9a075121a94f478d24c999602cc4a0dbf/Adafruit_NeoPixel.cpp#L3212
+ */
+uint24_t NeoPixel_HSV_Adafruit_Float(float ha_hue, float ha_sat, uint8_t val) {
+
+	uint8_t r, g, b;
+
+	// Remap 0-65535 to 0-1529. Pure red is CENTERED on the 64K rollover;
+	// 0 is not the start of pure red, but the midpoint...a few values above
+	// zero and a few below 65536 all yield pure red (similarly, 32768 is the
+	// midpoint, not start, of pure cyan). The 8-bit RGB hexcone (256 values
+	// each for red, green, blue) really only allows for 1530 distinct hues
+	// (not 1536, more on that below), but the full unsigned 16-bit type was
+	// chosen for hue so that one's code can easily handle a contiguous color
+	// wheel by allowing hue to roll over in either direction.
+	uint16_t hue = round(ha_hue * (1530.0 / 360.0));
+	uint8_t sat = round(ha_sat * (255.0/100.0));
+	// Because red is centered on the rollover point (the +32768 above,
+	// essentially a fixed-point +0.5), the above actually yields 0 to 1530,
+	// where 0 and 1530 would yield the same thing. Rather than apply a
+	// costly modulo operator, 1530 is handled as a special case below.
+
+	// So you'd think that the color "hexcone" (the thing that ramps from
+	// pure red, to pure yellow, to pure green and so forth back to red,
+	// yielding six slices), and with each color component having 256
+	// possible values (0-255), might have 1536 possible items (6*256),
+	// but in reality there's 1530. This is because the last element in
+	// each 256-element slice is equal to the first element of the next
+	// slice, and keeping those in there this would create small
+	// discontinuities in the color wheel. So the last element of each
+	// slice is dropped...we regard only elements 0-254, with item 255
+	// being picked up as element 0 of the next slice. Like this:
+	// Red to not-quite-pure-yellow is:        255,   0, 0 to 255, 254,   0
+	// Pure yellow to not-quite-pure-green is: 255, 255, 0 to   1, 255,   0
+	// Pure green to not-quite-pure-cyan is:     0, 255, 0 to   0, 255, 254
+	// and so forth. Hence, 1530 distinct hues (0 to 1529), and hence why
+	// the constants below are not the multiples of 256 you might expect.
+
+	// Convert hue to R,G,B (nested ifs faster than divide+mod+switch):
+	if (hue < 510) { // Red to Green-1
+		b = 0;
+		if (hue < 255) { //   Red to Yellow-1
+			r = 255;
+			g = hue;       //     g = 0 to 254
+			} else {         //   Yellow to Green-1
+			r = 510 - hue; //     r = 255 to 1
+			g = 255;
+		}
+		} else if (hue < 1020) { // Green to Blue-1
+		r = 0;
+		if (hue < 765) { //   Green to Cyan-1
+			g = 255;
+			b = hue - 510;  //     b = 0 to 254
+			} else {          //   Cyan to Blue-1
+			g = 1020 - hue; //     g = 255 to 1
+			b = 255;
+		}
+		} else if (hue < 1530) { // Blue to Red-1
+		g = 0;
+		if (hue < 1275) { //   Blue to Magenta-1
+			r = hue - 1020; //     r = 0 to 254
+			b = 255;
+			} else { //   Magenta to Red-1
+			r = 255;
+			b = 1530 - hue; //     b = 255 to 1
+		}
+		} else { // Last 0.5 Red (quicker than % operator)
+		r = 255;
+		g = b = 0;
+	}
+
+	// Apply saturation and value to R,G,B, pack into 32-bit result:
+	uint32_t v1 = 1 + val;  // 1 to 256; allows >>8 instead of /255
+	uint16_t s1 = 1 + sat;  // 1 to 256; same reason
+	uint8_t s2 = 255 - sat; // 255 to 0
+	
+	color_t output = {.r = (uint32_t)(((((r * s1) >> 8) + s2) * v1) >> 8),
+					  .g = (uint32_t)(((((g * s1) >> 8) + s2) * v1) >> 8),
+					  .b = (uint32_t)(((((b * s1) >> 8) + s2) * v1) >> 8)};
+					  
+	return output.channel;
 }
